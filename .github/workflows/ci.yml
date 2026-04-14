@@ -244,6 +244,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push to CocoaPods Trunk
-        run: pod trunk push webycash-sdk.podspec --allow-warnings --skip-import-validation --skip-tests
+        run: |
+          pod spec lint webycash-sdk.podspec --allow-warnings --no-clean 2>&1 || true
+          pod trunk push webycash-sdk.podspec --allow-warnings --skip-import-validation --skip-tests --synchronous
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
