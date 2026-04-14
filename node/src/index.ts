@@ -22,8 +22,6 @@ const lib = koffi.load(findLib());
 // ── FFI declarations ────────────────────────────────────────────
 
 const WebyWalletPtr = koffi.pointer("WebyWallet", koffi.opaque());
-const WebyWalletPtrPtr = koffi.pointer(WebyWalletPtr);
-const CharPtrPtr = koffi.pointer("char*", koffi.pointer(koffi.types.char));
 
 const ffi = {
   weby_wallet_open: lib.func("int32_t weby_wallet_open(const char*, _Out_ WebyWallet**)"),
@@ -61,11 +59,10 @@ function check(rc: number): void {
   }
 }
 
-function takeString(ptr: any): string {
-  if (!ptr) return "";
-  const s = koffi.decode(ptr, "char*") as string;
-  ffi.weby_free_string(ptr);
-  return s;
+function takeString(val: any): string {
+  // koffi _Out_ char** returns the string directly in the output array
+  if (val == null) return "";
+  return String(val);
 }
 
 // ── Public API ──────────────────────────────────────────────────

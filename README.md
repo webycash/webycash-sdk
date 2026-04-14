@@ -23,7 +23,8 @@
 <a href="https://crates.io/crates/webycash-sdk"><img src="https://img.shields.io/crates/v/webycash-sdk.svg" alt="crates.io"></a>
 <a href="https://www.npmjs.com/package/webycash-sdk"><img src="https://img.shields.io/npm/v/webycash-sdk.svg" alt="npm"></a>
 <a href="https://pypi.org/project/webycash-sdk/"><img src="https://img.shields.io/pypi/v/webycash-sdk.svg" alt="PyPI"></a>
-<a href="https://www.nuget.org/packages/webycash-sdk/"><img src="https://img.shields.io/nuget/v/webycash-sdk.svg" alt="NuGet"></a>
+<a href="https://www.nuget.org/packages/Webycash.SDK/"><img src="https://img.shields.io/nuget/v/Webycash.SDK.svg" alt="NuGet"></a>
+<a href="https://github.com/webycash/webycash-sdk/actions/workflows/ci.yml"><img src="https://github.com/webycash/webycash-sdk/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
