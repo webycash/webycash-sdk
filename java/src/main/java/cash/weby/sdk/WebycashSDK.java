@@ -3,15 +3,15 @@ package cash.weby.sdk;
 import com.sun.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
-public class WebcashSDK {
+public class WebycashSDK {
 
-    public static class WebcashException extends RuntimeException {
+    public static class WebycashException extends RuntimeException {
         public final int code;
-        public WebcashException(int code, String message) { super(message); this.code = code; }
+        public WebycashException(int code, String message) { super(message); this.code = code; }
     }
 
     private interface Lib extends Library {
-        Lib INSTANCE = Native.load("webcash_sdk", Lib.class);
+        Lib INSTANCE = Native.load("webycash_sdk", Lib.class);
         int weby_wallet_open(String path, PointerByReference out);
         int weby_wallet_open_with_seed(String path, Pointer seed, long seedLen, PointerByReference out);
         void weby_wallet_free(Pointer wallet);
@@ -34,7 +34,7 @@ public class WebcashSDK {
     private static void check(int rc) {
         if (rc != 0) {
             String msg = Lib.INSTANCE.weby_last_error_message();
-            throw new WebcashException(rc, msg != null ? msg : "Error " + rc);
+            throw new WebycashException(rc, msg != null ? msg : "Error " + rc);
         }
     }
 
@@ -82,11 +82,11 @@ public class WebcashSDK {
         public String balance() { PointerByReference o = new PointerByReference(); check(Lib.INSTANCE.weby_wallet_balance(ptr, o)); return takeString(o); }
         public void insert(String webcash) { check(Lib.INSTANCE.weby_wallet_insert(ptr, webcash)); }
         public String pay(String amount, String memo) { PointerByReference o = new PointerByReference(); check(Lib.INSTANCE.weby_wallet_pay(ptr, amount, memo, o)); return takeString(o); }
-        public void check() { WebcashSDK.check(Lib.INSTANCE.weby_wallet_check(ptr)); }
-        public String merge(int maxOutputs) { PointerByReference o = new PointerByReference(); WebcashSDK.check(Lib.INSTANCE.weby_wallet_merge(ptr, maxOutputs, o)); return takeString(o); }
-        public String recover(String masterSecretHex, int gapLimit) { PointerByReference o = new PointerByReference(); WebcashSDK.check(Lib.INSTANCE.weby_wallet_recover(ptr, masterSecretHex, gapLimit, o)); return takeString(o); }
-        public String stats() { PointerByReference o = new PointerByReference(); WebcashSDK.check(Lib.INSTANCE.weby_wallet_stats(ptr, o)); return takeString(o); }
-        public String exportSnapshot() { PointerByReference o = new PointerByReference(); WebcashSDK.check(Lib.INSTANCE.weby_wallet_export_snapshot(ptr, o)); return takeString(o); }
-        public void encryptSeed(String password) { WebcashSDK.check(Lib.INSTANCE.weby_wallet_encrypt_seed(ptr, password)); }
+        public void check() { WebycashSDK.check(Lib.INSTANCE.weby_wallet_check(ptr)); }
+        public String merge(int maxOutputs) { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_merge(ptr, maxOutputs, o)); return takeString(o); }
+        public String recover(String masterSecretHex, int gapLimit) { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_recover(ptr, masterSecretHex, gapLimit, o)); return takeString(o); }
+        public String stats() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_stats(ptr, o)); return takeString(o); }
+        public String exportSnapshot() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_export_snapshot(ptr, o)); return takeString(o); }
+        public void encryptSeed(String password) { WebycashSDK.check(Lib.INSTANCE.weby_wallet_encrypt_seed(ptr, password)); }
     }
 }

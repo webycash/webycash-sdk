@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cash.weby</groupId>
-    <artifactId>webcash-sdk</artifactId>
+    <artifactId>webycash-sdk</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>webcash-sdk</name>
+    <name>webycash-sdk</name>
     <description>Webcash cross-platform SDK — Java bindings</description>
     <url>https://github.com/webycash/webycash-sdk</url>
 

@@ -21,10 +21,10 @@ java {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "webcash-sdk"
+            artifactId = "webycash-sdk"
             from(components["java"])
             pom {
-                name.set("webcash-sdk")
+                name.set("webycash-sdk")
                 description.set("Webcash cross-platform SDK — Kotlin/JVM bindings")
                 url.set("https://github.com/webycash/webycash-sdk")
                 licenses { license { name.set("MIT"); url.set("https://opensource.org/licenses/MIT") } }

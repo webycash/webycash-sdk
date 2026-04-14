@@ -1,17 +1,17 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace WebcashSDK
+namespace WebycashSDK
 {
-    public class WebcashException : Exception
+    public class WebycashException : Exception
     {
         public int Code { get; }
-        public WebcashException(int code, string message) : base(message) { Code = code; }
+        public WebycashException(int code, string message) : base(message) { Code = code; }
     }
 
     internal static class Native
     {
-        const string LIB = "webcash_sdk";
+        const string LIB = "webycash_sdk";
 
         [DllImport(LIB)] public static extern int weby_wallet_open(string path, out IntPtr wallet);
         [DllImport(LIB)] public static extern int weby_wallet_open_with_seed(string path, byte[] seed, ulong seedLen, out IntPtr wallet);
@@ -39,7 +39,7 @@ namespace WebcashSDK
             if (rc != 0)
             {
                 var msg = Marshal.PtrToStringAnsi(Native.weby_last_error_message()) ?? $"Error {rc}";
-                throw new WebcashException(rc, msg);
+                throw new WebycashException(rc, msg);
             }
         }
 
@@ -86,11 +86,11 @@ namespace WebcashSDK
         public string Balance() { Check.Rc(Native.weby_wallet_balance(_ptr, out var p)); return Check.TakeString(p); }
         public void Insert(string webcash) { Check.Rc(Native.weby_wallet_insert(_ptr, webcash)); }
         public string Pay(string amount, string memo = "") { Check.Rc(Native.weby_wallet_pay(_ptr, amount, memo, out var p)); return Check.TakeString(p); }
-        public void Check() { WebcashSDK.Check.Rc(Native.weby_wallet_check(_ptr)); }
-        public string Merge(uint maxOutputs = 20) { WebcashSDK.Check.Rc(Native.weby_wallet_merge(_ptr, maxOutputs, out var p)); return WebcashSDK.Check.TakeString(p); }
-        public string Recover(string masterSecretHex, uint gapLimit = 20) { WebcashSDK.Check.Rc(Native.weby_wallet_recover(_ptr, masterSecretHex, gapLimit, out var p)); return WebcashSDK.Check.TakeString(p); }
-        public string Stats() { WebcashSDK.Check.Rc(Native.weby_wallet_stats(_ptr, out var p)); return WebcashSDK.Check.TakeString(p); }
-        public string ExportSnapshot() { WebcashSDK.Check.Rc(Native.weby_wallet_export_snapshot(_ptr, out var p)); return WebcashSDK.Check.TakeString(p); }
-        public void EncryptSeed(string password) { WebcashSDK.Check.Rc(Native.weby_wallet_encrypt_seed(_ptr, password)); }
+        public void Check() { WebycashSDK.Check.Rc(Native.weby_wallet_check(_ptr)); }
+        public string Merge(uint maxOutputs = 20) { WebycashSDK.Check.Rc(Native.weby_wallet_merge(_ptr, maxOutputs, out var p)); return WebycashSDK.Check.TakeString(p); }
+        public string Recover(string masterSecretHex, uint gapLimit = 20) { WebycashSDK.Check.Rc(Native.weby_wallet_recover(_ptr, masterSecretHex, gapLimit, out var p)); return WebycashSDK.Check.TakeString(p); }
+        public string Stats() { WebycashSDK.Check.Rc(Native.weby_wallet_stats(_ptr, out var p)); return WebycashSDK.Check.TakeString(p); }
+        public string ExportSnapshot() { WebycashSDK.Check.Rc(Native.weby_wallet_export_snapshot(_ptr, out var p)); return WebycashSDK.Check.TakeString(p); }
+        public void EncryptSeed(string password) { WebycashSDK.Check.Rc(Native.weby_wallet_encrypt_seed(_ptr, password)); }
     }
 }

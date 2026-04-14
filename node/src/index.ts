@@ -3,9 +3,9 @@ import path from "path";
 import os from "os";
 
 const LIB_NAME: Record<string, string> = {
-  linux: "libwebcash_sdk.so",
-  darwin: "libwebcash_sdk.dylib",
-  win32: "webcash_sdk.dll",
+  linux: "libwebycash_sdk.so",
+  darwin: "libwebycash_sdk.dylib",
+  win32: "webycash_sdk.dll",
 };
 
 function findLib(): string {
@@ -47,17 +47,17 @@ const ffi = {
 
 // ── Helpers ─────────────────────────────────────────────────────
 
-export class WebcashError extends Error {
+export class WebycashError extends Error {
   constructor(public code: number, message: string) {
     super(message);
-    this.name = "WebcashError";
+    this.name = "WebycashError";
   }
 }
 
 function check(rc: number): void {
   if (rc !== 0) {
     const msg = ffi.weby_last_error_message();
-    throw new WebcashError(rc, msg ?? `Error code ${rc}`);
+    throw new WebycashError(rc, msg ?? `Error code ${rc}`);
   }
 }
 

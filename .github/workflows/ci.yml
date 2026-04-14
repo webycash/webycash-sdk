@@ -136,10 +136,10 @@ jobs:
           python-version: '3.12'
       - name: Copy native libs
         run: |
-          cp artifacts/native-x86_64-unknown-linux-gnu/*.so python/webcash_sdk/ 2>/dev/null || true
-          cp artifacts/native-aarch64-apple-darwin/*.dylib python/webcash_sdk/ 2>/dev/null || true
-          cp artifacts/native-x86_64-apple-darwin/*.dylib python/webcash_sdk/ 2>/dev/null || true
-          cp artifacts/native-x86_64-pc-windows-msvc/*.dll python/webcash_sdk/ 2>/dev/null || true
+          cp artifacts/native-x86_64-unknown-linux-gnu/*.so python/webycash_sdk/ 2>/dev/null || true
+          cp artifacts/native-aarch64-apple-darwin/*.dylib python/webycash_sdk/ 2>/dev/null || true
+          cp artifacts/native-x86_64-apple-darwin/*.dylib python/webycash_sdk/ 2>/dev/null || true
+          cp artifacts/native-x86_64-pc-windows-msvc/*.dll python/webycash_sdk/ 2>/dev/null || true
       - name: Build and publish
         working-directory: python
         run: |
@@ -219,7 +219,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           for dir in artifacts/native-*; do
             TARGET=$(basename "$dir" | sed 's/native-//')
-            STAGING="webcash-sdk-${VERSION}-${TARGET}"
+            STAGING="webycash-sdk-${VERSION}-${TARGET}"
             mkdir -p "$STAGING"
             cp LICENSE README.md "$STAGING/"
             cp include/webycash.h "$STAGING/"
@@ -230,5 +230,5 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            webcash-sdk-*.tar.gz
-            webcash-sdk-*.tar.gz.sha256
+            webycash-sdk-*.tar.gz
+            webycash-sdk-*.tar.gz.sha256

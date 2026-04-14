@@ -8,17 +8,17 @@ import sys
 from pathlib import Path
 
 
-class WebcashError(Exception):
-    """Error raised by webcash-sdk operations."""
+class WebycashError(Exception):
+    """Error raised by webycash-sdk operations."""
     pass
 
 
 def _find_lib():
-    """Locate the native webcash_sdk shared library."""
+    """Locate the native webycash_sdk shared library."""
     name = {
-        "Linux": "libwebcash_sdk.so",
-        "Darwin": "libwebcash_sdk.dylib",
-        "Windows": "webcash_sdk.dll",
+        "Linux": "libwebycash_sdk.so",
+        "Darwin": "libwebycash_sdk.dylib",
+        "Windows": "webycash_sdk.dll",
     }.get(platform.system())
     if name is None:
         raise OSError(f"Unsupported platform: {platform.system()}")
@@ -26,7 +26,7 @@ def _find_lib():
     local = Path(__file__).parent / name
     if local.exists():
         return str(local)
-    found = ctypes.util.find_library("webcash_sdk")
+    found = ctypes.util.find_library("webycash_sdk")
     if found:
         return found
     raise OSError(f"Cannot find {name}. Place it next to this module or install system-wide.")
@@ -91,7 +91,7 @@ _lib.weby_free_string.restype = None
 def _check(rc: int):
     if rc != 0:
         msg = _lib.weby_last_error_message()
-        raise WebcashError(msg.decode() if msg else f"Error code {rc}")
+        raise WebycashError(msg.decode() if msg else f"Error code {rc}")
 
 
 def _take_string(ptr: ctypes.c_char_p) -> str:

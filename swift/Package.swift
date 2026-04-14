@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "webcash-sdk",
+    name: "webycash-sdk",
     platforms: [
         .iOS(.v15),
         .macOS(.v13),
@@ -11,18 +11,18 @@ let package = Package(
         .visionOS(.v1),
     ],
     products: [
-        .library(name: "WebcashSDK", targets: ["WebcashSDK"]),
+        .library(name: "WebycashSDK", targets: ["WebycashSDK"]),
     ],
     targets: [
         .target(
-            name: "CWebcashSDK",
-            path: "Sources/CWebcashSDK",
+            name: "CWebycashSDK",
+            path: "Sources/CWebycashSDK",
             publicHeadersPath: "include"
         ),
         .target(
-            name: "WebcashSDK",
-            dependencies: ["CWebcashSDK"],
-            path: "Sources/WebcashSDK"
+            name: "WebycashSDK",
+            dependencies: ["CWebycashSDK"],
+            path: "Sources/WebycashSDK"
         ),
     ]
 )

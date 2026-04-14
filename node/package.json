@@ -1,5 +1,5 @@
 {
-  "name": "webcash-sdk",
+  "name": "webycash-sdk",
   "version": "0.1.0",
   "description": "Webcash cross-platform SDK — Node.js/TypeScript bindings",
   "main": "dist/index.js",

@@ -1,7 +1,7 @@
 import Foundation
-import CWebcashSDK
+import CWebycashSDK
 
-public enum WebcashError: Error, LocalizedError {
+public enum WebycashError: Error, LocalizedError {
     case ffi(code: Int32, message: String)
     public var errorDescription: String? {
         switch self { case .ffi(_, let msg): return msg }
@@ -11,7 +11,7 @@ public enum WebcashError: Error, LocalizedError {
 private func check(_ rc: Int32) throws {
     guard rc == 0 else {
         let msg = weby_last_error_message().flatMap { String(cString: $0) } ?? "Unknown error"
-        throw WebcashError.ffi(code: rc, message: msg)
+        throw WebycashError.ffi(code: rc, message: msg)
     }
 }
 
@@ -35,7 +35,7 @@ public final class Wallet {
 
     /// Open or create a wallet with a caller-provided 32-byte seed.
     public init(path: String, seed: Data) throws {
-        guard seed.count == 32 else { throw WebcashError.ffi(code: 1, message: "Seed must be 32 bytes") }
+        guard seed.count == 32 else { throw WebycashError.ffi(code: 1, message: "Seed must be 32 bytes") }
         var out: OpaquePointer?
         try seed.withUnsafeBytes { buf in
             try check(weby_wallet_open_with_seed(path, buf.baseAddress!.assumingMemoryBound(to: UInt8.self), seed.count, &out))
@@ -66,35 +66,35 @@ public final class Wallet {
     }
 
     public func check() throws {
-        try WebcashSDK.check(weby_wallet_check(ptr))
+        try WebycashSDK.check(weby_wallet_check(ptr))
     }
 
     public func merge(maxOutputs: UInt32 = 20) throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebcashSDK.check(weby_wallet_merge(ptr, maxOutputs, &out))
+        try WebycashSDK.check(weby_wallet_merge(ptr, maxOutputs, &out))
         return takeString(out)
     }
 
     public func recover(masterSecretHex: String, gapLimit: UInt32 = 20) throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebcashSDK.check(weby_wallet_recover(ptr, masterSecretHex, gapLimit, &out))
+        try WebycashSDK.check(weby_wallet_recover(ptr, masterSecretHex, gapLimit, &out))
         return takeString(out)
     }
 
     public func stats() throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebcashSDK.check(weby_wallet_stats(ptr, &out))
+        try WebycashSDK.check(weby_wallet_stats(ptr, &out))
         return takeString(out)
     }
 
     public func exportSnapshot() throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebcashSDK.check(weby_wallet_export_snapshot(ptr, &out))
+        try WebycashSDK.check(weby_wallet_export_snapshot(ptr, &out))
         return takeString(out)
     }
 
     public func encryptSeed(password: String) throws {
-        try WebcashSDK.check(weby_wallet_encrypt_seed(ptr, password))
+        try WebycashSDK.check(weby_wallet_encrypt_seed(ptr, password))
     }
 }
 

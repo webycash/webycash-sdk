@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <PackageId>webcash-sdk</PackageId>
+    <PackageId>webycash-sdk</PackageId>
     <Version>0.1.0</Version>
     <Authors>Webycash Developers</Authors>
     <Description>Webcash cross-platform SDK — .NET/C# bindings</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/webycash/webycash-sdk</RepositoryUrl>
     <PackageTags>webcash;wallet;sdk;payments</PackageTags>
-    <RootNamespace>WebcashSDK</RootNamespace>
+    <RootNamespace>WebycashSDK</RootNamespace>
   </PropertyGroup>
 </Project>

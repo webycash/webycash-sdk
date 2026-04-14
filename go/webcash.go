@@ -1,8 +1,8 @@
-// Package webcash_sdk provides Go bindings for the Webcash wallet SDK.
-package webcash_sdk
+// Package webycash_sdk provides Go bindings for the Webcash wallet SDK.
+package webycash_sdk
 
 /*
-#cgo LDFLAGS: -lwebcash_sdk
+#cgo LDFLAGS: -lwebycash_sdk
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -30,19 +30,19 @@ import (
 	"unsafe"
 )
 
-type WebcashError struct {
+type WebycashError struct {
 	Code    int
 	Message string
 }
 
-func (e *WebcashError) Error() string { return e.Message }
+func (e *WebycashError) Error() string { return e.Message }
 
 func check(rc C.int32_t) error {
 	if rc == 0 {
 		return nil
 	}
 	msg := C.weby_last_error_message()
-	return &WebcashError{Code: int(rc), Message: C.GoString(msg)}
+	return &WebycashError{Code: int(rc), Message: C.GoString(msg)}
 }
 
 func takeString(p *C.char) string {

@@ -1,5 +1,5 @@
-module CWebcashSDK {
+module CWebycashSDK {
     header "include/webycash.h"
-    link "webcash_sdk"
+    link "webycash_sdk"
     export *
 }

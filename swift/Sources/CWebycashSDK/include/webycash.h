@@ -1,6 +1,6 @@
-/* webcash-sdk C API — MIT License (c) 2026 Webycash */
-#ifndef WEBCASH_SDK_H
-#define WEBCASH_SDK_H
+/* webycash-sdk C API — MIT License (c) 2026 Webycash */
+#ifndef WEBYCASH_SDK_H
+#define WEBYCASH_SDK_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -95,4 +95,4 @@ void weby_free_string(char *ptr);
 }
 #endif
 
-#endif /* WEBCASH_SDK_H */
+#endif /* WEBYCASH_SDK_H */
