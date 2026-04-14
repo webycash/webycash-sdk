@@ -1,12 +1,11 @@
 Pod::Spec.new do |s|
   s.name         = 'webycash-sdk'
-  s.version      = '0.1.7'
+  s.version      = '0.1.8'
   s.summary      = 'Webcash cross-platform wallet SDK — Swift bindings'
   s.description  = <<-DESC
     Swift bindings for the webycash-sdk native library.
     Provides a Wallet class for managing Webcash HD wallets with
     insert, pay, merge, recover, check, and encryption operations.
-    Requires linking against libwebycash_sdk (download from GitHub Releases).
   DESC
   s.homepage     = 'https://github.com/webycash/webycash-sdk'
   s.license      = { :type => 'MIT', :file => 'LICENSE' }
@@ -18,17 +17,19 @@ Pod::Spec.new do |s|
   s.watchos.deployment_target = '8.0'
   s.tvos.deployment_target    = '15.0'
 
-  s.source_files  = 'swift/Sources/WebycashSDK/**/*.swift',
-                    'swift/Sources/CWebycashSDK/include/**/*.h'
-  s.public_header_files = 'swift/Sources/CWebycashSDK/include/**/*.h'
-  s.preserve_paths = 'include/**/*'
+  s.subspec 'CWebycashSDK' do |c|
+    c.source_files         = 'swift/Sources/CWebycashSDK/include/**/*.h'
+    c.public_header_files  = 'swift/Sources/CWebycashSDK/include/**/*.h'
+    c.preserve_paths       = 'swift/Sources/CWebycashSDK/module.modulemap'
+    c.pod_target_xcconfig  = {
+      'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/swift/Sources/CWebycashSDK',
+    }
+  end
 
-  s.pod_target_xcconfig = {
-    'SWIFT_INCLUDE_PATHS' => '"$(PODS_TARGET_SRCROOT)/swift/Sources/CWebycashSDK"',
-  }
+  s.subspec 'WebycashSDK' do |w|
+    w.dependency 'webycash-sdk/CWebycashSDK'
+    w.source_files = 'swift/Sources/WebycashSDK/**/*.swift'
+  end
 
-  s.prepare_command = <<-CMD
-    # modulemap is already in the source tree
-    true
-  CMD
+  s.default_subspecs = 'WebycashSDK'
 end
