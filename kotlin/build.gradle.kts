@@ -1,11 +1,10 @@
 plugins {
     kotlin("jvm") version "1.9.24"
-    `maven-publish`
-    signing
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 group = "cash.weby"
-version = "0.1.2"
+version = "0.1.3"
 
 repositories { mavenCentral() }
 
@@ -18,34 +17,31 @@ java {
     withJavadocJar()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = "webycash-sdk"
-            from(components["java"])
-            pom {
-                name.set("webycash-sdk")
-                description.set("Webcash cross-platform SDK — Kotlin/JVM bindings")
-                url.set("https://github.com/webycash/webycash-sdk")
-                licenses { license { name.set("MIT"); url.set("https://opensource.org/licenses/MIT") } }
-                developers { developer { id.set("webycash"); name.set("Webycash Developers") } }
-                scm { url.set("https://github.com/webycash/webycash-sdk") }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
-            }
-        }
-    }
-}
+mavenPublishing {
+    coordinates("cash.weby", "webycash-sdk", version.toString())
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    signAllPublications()
 
-signing {
-    useInMemoryPgpKeys(System.getenv("GPG_PRIVATE_KEY"), System.getenv("GPG_PASSPHRASE"))
-    sign(publishing.publications["maven"])
+    pom {
+        name.set("webycash-sdk")
+        description.set("Webcash cross-platform SDK — Kotlin/JVM bindings")
+        url.set("https://github.com/webycash/webycash-sdk")
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
+            }
+        }
+        developers {
+            developer {
+                id.set("webycash")
+                name.set("Webycash Developers")
+            }
+        }
+        scm {
+            url.set("https://github.com/webycash/webycash-sdk")
+            connection.set("scm:git:git://github.com/webycash/webycash-sdk.git")
+            developerConnection.set("scm:git:ssh://git@github.com/webycash/webycash-sdk.git")
+        }
+    }
 }

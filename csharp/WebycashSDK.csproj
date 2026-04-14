@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <PackageId>webycash-sdk</PackageId>
-    <Version>0.1.2</Version>
+    <PackageId>Webycash.SDK</PackageId>
+    <Version>0.1.3</Version>
     <Authors>Webycash Developers</Authors>
     <Description>Webcash cross-platform SDK — .NET/C# bindings</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
