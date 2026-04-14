@@ -183,7 +183,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Publish Kotlin
         working-directory: kotlin
-        run: gradle publishAndReleaseToMavenCentral --stacktrace --info
+        run: gradle publishAndReleaseToMavenCentral
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
@@ -235,3 +235,15 @@ jobs:
           files: |
             webycash-sdk-*.tar.gz
             webycash-sdk-*.tar.gz.sha256
+
+  publish-cocoapods:
+    name: Publish CocoaPods
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: native
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push to CocoaPods Trunk
+        run: pod trunk push webycash-sdk.podspec --allow-warnings --skip-import-validation --skip-tests
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
