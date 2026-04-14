@@ -1,11 +1,14 @@
 <p align="center">
-<pre>
-                _                _               _ _
-__      _____| |__   ___ __ _| |__         ___| | | __
-\ \ /\ / / _ \ '_ \ / __/ _` / __| '_____|/ __| | |/ /
- \ V  V /  __/ |_) | (_| (_| \__ \ | |_____\__ \ |   <
-  \_/\_/ \___|_.__/ \___\__,_|___/_||_|     |___/_|_|\_\
-</pre>
+
+```
+                 __                            __                  __  __
+ _      __ ___  / /_   __  __ _____ ____ _ ___/ /_           ___ / / / / __
+| | /| / // _ \/ __ \ / / / // ___// __ `// __  / ___       / __// / / / / /
+| |/ |/ //  __// /_/ // /_/ // /__ / /_/ //_/ / / ___/____ _\ \ / /_/ / / /__
+|__/|__/ \___//_.___/ \__, / \___/ \__,_/ \__,_/     /____//___/ \__,_/ /____/
+                     /____/
+```
+
 </p>
 
 <p align="center">
@@ -160,6 +163,20 @@ try (var wallet = new WebycashSDK.Wallet("my_wallet.db")) {
                   │      webcash.org server        │
                   └──────────────────────────────┘
 ```
+
+## Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [API Reference](docs/API.md) | Universal API — every function, every type, every error code |
+| [Python](docs/python.md) | pip install, ctypes bindings, error handling |
+| [TypeScript / Node.js](docs/typescript.md) | npm install, koffi FFI, async patterns |
+| [Swift](docs/swift.md) | SPM install, iOS/macOS/watchOS/tvOS/visionOS |
+| [Kotlin](docs/kotlin.md) | Gradle install, JNA bindings, Android |
+| [Java](docs/java.md) | Maven/Gradle install, JNA bindings |
+| [C# / .NET](docs/csharp.md) | NuGet install, P/Invoke, Unity |
+| [Go](docs/go.md) | Go modules, cgo bindings |
+| [C / C++](docs/cpp.md) | CMake, header-only C++ wrapper, memory rules |
 
 ## Building from Source
 
