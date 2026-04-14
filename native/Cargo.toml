@@ -1,6 +1,6 @@
 [package]
 name = "webycash-sdk"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 rust-version = "1.85"
 description = "Webcash cross-platform SDK — FFI bridge for Rust, Swift, Kotlin, Java, C#, Python, TypeScript, Go, C/C++"
@@ -16,4 +16,4 @@ name = "webycash_sdk"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-webylib = { version = "0.2.2", features = ["ffi"] }
+webylib = { version = "0.2.3", features = ["ffi"] }
