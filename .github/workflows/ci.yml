@@ -165,9 +165,17 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0
-      - name: Pack
+      - name: Pack and sign
         working-directory: csharp
-        run: dotnet pack -c Release
+        run: |
+          echo "${{ secrets.NUGET_SIGNING_CERT }}" | base64 -d > /tmp/nuget-signing.pfx
+          dotnet pack -c Release
+          dotnet nuget sign bin/Release/*.nupkg \
+            --certificate-path /tmp/nuget-signing.pfx \
+            --certificate-password "${{ secrets.NUGET_SIGNING_CERT_PASSWORD }}" \
+            --timestamper http://timestamp.digicert.com \
+            --overwrite
+          rm -f /tmp/nuget-signing.pfx
       - name: NuGet login (Trusted Publishing OIDC)
         uses: NuGet/login@v1
         id: nuget-login
