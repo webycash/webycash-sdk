@@ -1,0 +1,21 @@
+{
+  "name": "webcash-sdk",
+  "version": "0.1.0",
+  "description": "Webcash cross-platform SDK — Node.js/TypeScript bindings",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": "https://github.com/webycash/webycash-sdk",
+  "keywords": ["webcash", "wallet", "sdk", "payments"],
+  "files": ["dist", "*.so", "*.dylib", "*.dll"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "koffi": "^2.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4"
+  }
+}
