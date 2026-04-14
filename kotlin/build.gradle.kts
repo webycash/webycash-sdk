@@ -4,17 +4,12 @@ plugins {
 }
 
 group = "cash.weby"
-version = "0.1.4"
+version = "0.1.5"
 
 repositories { mavenCentral() }
 
 dependencies {
     implementation("net.java.dev.jna:jna:5.14.0")
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
 }
 
 mavenPublishing {
