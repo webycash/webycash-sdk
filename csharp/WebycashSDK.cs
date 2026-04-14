@@ -32,7 +32,7 @@ namespace WebycashSDK
         [DllImport(LIB)] public static extern void weby_free_string(IntPtr ptr);
     }
 
-    internal static class Check
+    internal static class Ffi
     {
         public static void Rc(int rc)
         {
@@ -58,14 +58,14 @@ namespace WebycashSDK
 
         public static long AmountParse(string s)
         {
-            Check.Rc(Native.weby_amount_parse(s, out var wats));
+            Ffi.Rc(Native.weby_amount_parse(s, out var wats));
             return wats;
         }
 
         public static string AmountFormat(long wats)
         {
-            Check.Rc(Native.weby_amount_format(wats, out var ptr));
-            return Check.TakeString(ptr);
+            Ffi.Rc(Native.weby_amount_format(wats, out var ptr));
+            return Ffi.TakeString(ptr);
         }
     }
 
@@ -73,24 +73,24 @@ namespace WebycashSDK
     {
         private IntPtr _ptr;
 
-        public Wallet(string path) { Check.Rc(Native.weby_wallet_open(path, out _ptr)); }
+        public Wallet(string path) { Ffi.Rc(Native.weby_wallet_open(path, out _ptr)); }
 
         public Wallet(string path, byte[] seed)
         {
             if (seed.Length != 32) throw new ArgumentException("Seed must be 32 bytes");
-            Check.Rc(Native.weby_wallet_open_with_seed(path, seed, (ulong)seed.Length, out _ptr));
+            Ffi.Rc(Native.weby_wallet_open_with_seed(path, seed, (ulong)seed.Length, out _ptr));
         }
 
         public void Dispose() { if (_ptr != IntPtr.Zero) { Native.weby_wallet_free(_ptr); _ptr = IntPtr.Zero; } }
 
-        public string Balance() { Check.Rc(Native.weby_wallet_balance(_ptr, out var p)); return Check.TakeString(p); }
-        public void Insert(string webcash) { Check.Rc(Native.weby_wallet_insert(_ptr, webcash)); }
-        public string Pay(string amount, string memo = "") { Check.Rc(Native.weby_wallet_pay(_ptr, amount, memo, out var p)); return Check.TakeString(p); }
-        public void Check() { WebycashSDK.Check.Rc(Native.weby_wallet_check(_ptr)); }
-        public string Merge(uint maxOutputs = 20) { WebycashSDK.Check.Rc(Native.weby_wallet_merge(_ptr, maxOutputs, out var p)); return WebycashSDK.Check.TakeString(p); }
-        public string Recover(string masterSecretHex, uint gapLimit = 20) { WebycashSDK.Check.Rc(Native.weby_wallet_recover(_ptr, masterSecretHex, gapLimit, out var p)); return WebycashSDK.Check.TakeString(p); }
-        public string Stats() { WebycashSDK.Check.Rc(Native.weby_wallet_stats(_ptr, out var p)); return WebycashSDK.Check.TakeString(p); }
-        public string ExportSnapshot() { WebycashSDK.Check.Rc(Native.weby_wallet_export_snapshot(_ptr, out var p)); return WebycashSDK.Check.TakeString(p); }
-        public void EncryptSeed(string password) { WebycashSDK.Check.Rc(Native.weby_wallet_encrypt_seed(_ptr, password)); }
+        public string Balance() { Ffi.Rc(Native.weby_wallet_balance(_ptr, out var p)); return Ffi.TakeString(p); }
+        public void Insert(string webcash) { Ffi.Rc(Native.weby_wallet_insert(_ptr, webcash)); }
+        public string Pay(string amount, string memo = "") { Ffi.Rc(Native.weby_wallet_pay(_ptr, amount, memo, out var p)); return Ffi.TakeString(p); }
+        public void Check() { WebycashSDK.Ffi.Rc(Native.weby_wallet_check(_ptr)); }
+        public string Merge(uint maxOutputs = 20) { WebycashSDK.Ffi.Rc(Native.weby_wallet_merge(_ptr, maxOutputs, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public string Recover(string masterSecretHex, uint gapLimit = 20) { WebycashSDK.Ffi.Rc(Native.weby_wallet_recover(_ptr, masterSecretHex, gapLimit, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public string Stats() { WebycashSDK.Ffi.Rc(Native.weby_wallet_stats(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public string ExportSnapshot() { WebycashSDK.Ffi.Rc(Native.weby_wallet_export_snapshot(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public void EncryptSeed(string password) { WebycashSDK.Ffi.Rc(Native.weby_wallet_encrypt_seed(_ptr, password)); }
     }
 }
