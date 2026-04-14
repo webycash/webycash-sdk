@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <PackageId>webycash-sdk</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>Webycash Developers</Authors>
     <Description>Webcash cross-platform SDK — .NET/C# bindings</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
