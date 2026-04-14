@@ -163,11 +163,26 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0
-      - name: Pack and publish
+      - name: Pack, sign, and publish
         working-directory: csharp
         run: |
+          # Decode signing certificate
+          echo "${{ secrets.NUGET_SIGNING_CERT }}" | base64 -d > /tmp/nuget-signing.pfx
+          # Pack
           dotnet pack -c Release
-          dotnet nuget push bin/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          # Sign the package
+          dotnet nuget sign bin/Release/*.nupkg \
+            --certificate-path /tmp/nuget-signing.pfx \
+            --certificate-password "${{ secrets.NUGET_SIGNING_CERT_PASSWORD }}" \
+            --timestamper http://timestamp.digicert.com \
+            --overwrite
+          # Push
+          dotnet nuget push bin/Release/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+          # Cleanup
+          rm -f /tmp/nuget-signing.pfx
 
   publish-maven:
     name: Publish Maven Central

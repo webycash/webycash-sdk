@@ -1,6 +1,6 @@
 [package]
 name = "webycash-sdk"
-version = "0.1.9"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.85"
 description = "Webcash cross-platform SDK — FFI bridge for Rust, Swift, Kotlin, Java, C#, Python, TypeScript, Go, C/C++"
