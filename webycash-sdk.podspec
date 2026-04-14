@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'webycash-sdk'
-  s.version      = '0.1.8'
+  s.version      = '0.1.9'
   s.summary      = 'Webcash cross-platform wallet SDK — Swift bindings'
   s.description  = <<-DESC
     Swift bindings for the webycash-sdk native library.
@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
   s.osx.deployment_target     = '13.0'
   s.watchos.deployment_target = '8.0'
   s.tvos.deployment_target    = '15.0'
+  s.swift_versions            = ['5.9', '5.10', '6.0']
 
   s.subspec 'CWebycashSDK' do |c|
     c.source_files         = 'swift/Sources/CWebycashSDK/include/**/*.h'

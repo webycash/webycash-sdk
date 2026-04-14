@@ -8,7 +8,7 @@ public enum WebycashError: Error, LocalizedError {
     }
 }
 
-private func check(_ rc: Int32) throws {
+private func ffiCheck(_ rc: Int32) throws {
     guard rc == 0 else {
         let msg = weby_last_error_message().flatMap { String(cString: $0) } ?? "Unknown error"
         throw WebycashError.ffi(code: rc, message: msg)
@@ -29,7 +29,7 @@ public final class Wallet {
     /// Open or create a wallet at `path`.
     public init(path: String) throws {
         var out: OpaquePointer?
-        try check(weby_wallet_open(path, &out))
+        try ffiCheck(weby_wallet_open(path, &out))
         self.ptr = out
     }
 
@@ -38,7 +38,7 @@ public final class Wallet {
         guard seed.count == 32 else { throw WebycashError.ffi(code: 1, message: "Seed must be 32 bytes") }
         var out: OpaquePointer?
         try seed.withUnsafeBytes { buf in
-            try check(weby_wallet_open_with_seed(path, buf.baseAddress!.assumingMemoryBound(to: UInt8.self), seed.count, &out))
+            try ffiCheck(weby_wallet_open_with_seed(path, buf.baseAddress!.assumingMemoryBound(to: UInt8.self), seed.count, &out))
         }
         self.ptr = out
     }
@@ -51,50 +51,50 @@ public final class Wallet {
 
     public func balance() throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try check(weby_wallet_balance(ptr, &out))
+        try ffiCheck(weby_wallet_balance(ptr, &out))
         return takeString(out)
     }
 
     public func insert(_ webcash: String) throws {
-        try check(weby_wallet_insert(ptr, webcash))
+        try ffiCheck(weby_wallet_insert(ptr, webcash))
     }
 
     public func pay(amount: String, memo: String = "") throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try check(weby_wallet_pay(ptr, amount, memo, &out))
+        try ffiCheck(weby_wallet_pay(ptr, amount, memo, &out))
         return takeString(out)
     }
 
     public func check() throws {
-        try WebycashSDK.check(weby_wallet_check(ptr))
+        try WebycashSDK.ffiCheck(weby_wallet_check(ptr))
     }
 
     public func merge(maxOutputs: UInt32 = 20) throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebycashSDK.check(weby_wallet_merge(ptr, maxOutputs, &out))
+        try WebycashSDK.ffiCheck(weby_wallet_merge(ptr, maxOutputs, &out))
         return takeString(out)
     }
 
     public func recover(masterSecretHex: String, gapLimit: UInt32 = 20) throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebycashSDK.check(weby_wallet_recover(ptr, masterSecretHex, gapLimit, &out))
+        try WebycashSDK.ffiCheck(weby_wallet_recover(ptr, masterSecretHex, gapLimit, &out))
         return takeString(out)
     }
 
     public func stats() throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebycashSDK.check(weby_wallet_stats(ptr, &out))
+        try WebycashSDK.ffiCheck(weby_wallet_stats(ptr, &out))
         return takeString(out)
     }
 
     public func exportSnapshot() throws -> String {
         var out: UnsafeMutablePointer<CChar>?
-        try WebycashSDK.check(weby_wallet_export_snapshot(ptr, &out))
+        try WebycashSDK.ffiCheck(weby_wallet_export_snapshot(ptr, &out))
         return takeString(out)
     }
 
     public func encryptSeed(password: String) throws {
-        try WebycashSDK.check(weby_wallet_encrypt_seed(ptr, password))
+        try WebycashSDK.ffiCheck(weby_wallet_encrypt_seed(ptr, password))
     }
 }
 
@@ -106,13 +106,13 @@ public func version() -> String {
 /// Parse a decimal amount string to integer wats.
 public func amountParse(_ s: String) throws -> Int64 {
     var out: Int64 = 0
-    try check(weby_amount_parse(s, &out))
+    try ffiCheck(weby_amount_parse(s, &out))
     return out
 }
 
 /// Format integer wats as a decimal string.
 public func amountFormat(_ wats: Int64) throws -> String {
     var out: UnsafeMutablePointer<CChar>?
-    try check(weby_amount_format(wats, &out))
+    try ffiCheck(weby_amount_format(wats, &out))
     return takeString(out)
 }
