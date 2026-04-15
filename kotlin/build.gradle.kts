@@ -4,12 +4,18 @@ plugins {
 }
 
 group = "cash.weby"
-version = "0.2.6"
+version = "0.2.7"
 
 repositories { mavenCentral() }
 
 dependencies {
     implementation("net.java.dev.jna:jna:5.14.0")
+    testImplementation(kotlin("test-junit5"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 mavenPublishing {

@@ -91,11 +91,80 @@ jobs:
             native/target/${{ matrix.target }}/release/*.a
             native/target/${{ matrix.target }}/release/*.lib
 
+  # ── Binding smoke tests (offline FFI) ────────────────────────────
+  test-bindings:
+    name: Test bindings
+    needs: native
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-aarch64-apple-darwin
+          path: native-lib
+      - name: Library path
+        run: |
+          ls -la native-lib
+          echo "DYLD_LIBRARY_PATH=${{ github.workspace }}/native-lib" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python
+        run: |
+          cp native-lib/libwebycash_sdk.dylib python/webycash_sdk/
+          pip install -e "python[dev]"
+          pytest python/tests/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Node.js
+        run: |
+          cp native-lib/libwebycash_sdk.dylib node/
+          cd node && npm ci && npm run build && npm test
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Go
+        env:
+          CGO_LDFLAGS: -L${{ github.workspace }}/native-lib -lwebycash_sdk
+        run: cd go && go test -v .
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0
+      - name: C#
+        run: dotnet test csharp/WebycashSDK.Tests/WebycashSDK.Tests.csproj
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Kotlin
+        run: cd kotlin && gradle test --no-daemon
+
+      - name: Java
+        run: cd java && mvn -q test
+
+      - name: C++
+        run: |
+          g++ -std=c++17 -I include cpp/test_smoke.cpp -L native-lib -lwebycash_sdk -o /tmp/webycash_cpp_smoke
+          /tmp/webycash_cpp_smoke
+
+      - name: Swift
+        run: |
+          mkdir -p native/target/release
+          cp native-lib/libwebycash_sdk.dylib native/target/release/
+          cd swift && swift test
+
   # ── Publish to package managers on tag ─────────────────────────
   publish-npm:
     name: Publish npm
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -124,7 +193,7 @@ jobs:
   publish-pypi:
     name: Publish PyPI
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -153,7 +222,7 @@ jobs:
   publish-nuget:
     name: Publish NuGet
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -192,7 +261,7 @@ jobs:
   publish-maven:
     name: Publish Maven Central
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -213,7 +282,7 @@ jobs:
   publish-cargo:
     name: Publish Cargo
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -228,7 +297,7 @@ jobs:
   release:
     name: GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -259,7 +328,7 @@ jobs:
   publish-cocoapods:
     name: Publish CocoaPods
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    needs: [native, test-bindings]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

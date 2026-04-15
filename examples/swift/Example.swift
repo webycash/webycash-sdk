@@ -32,10 +32,10 @@ print("Version: \(String(cString: weby_version()))")
 // Amount utilities
 print("\n-- Amount utilities --")
 var wats: Int64 = 0
-weby_amount_parse("1.5", &wats)
+precondition(weby_amount_parse("1.5", &wats) == 0)
 print("  parse('1.5') = \(wats) wats")
 var fmtPtr: UnsafeMutablePointer<CChar>? = nil
-weby_amount_format(wats, &fmtPtr)
+precondition(weby_amount_format(wats, &fmtPtr) == 0)
 print("  format(\(wats)) = '\(takeString(fmtPtr))'")
 
 // Wallet lifecycle
@@ -51,16 +51,16 @@ guard rc == 0, wallet != nil else {
 }
 
 var balPtr: UnsafeMutablePointer<CChar>? = nil
-weby_wallet_balance(wallet, &balPtr)
+precondition(weby_wallet_balance(wallet, &balPtr) == 0)
 print("  Balance: \(takeString(balPtr))")
 
 var statsPtr: UnsafeMutablePointer<CChar>? = nil
-weby_wallet_stats(wallet, &statsPtr)
+precondition(weby_wallet_stats(wallet, &statsPtr) == 0)
 print("  Stats: \(takeString(statsPtr))")
 
 // Encrypt seed
 print("\n-- Encrypt seed --")
-weby_wallet_encrypt_seed(wallet, "test_password")
+precondition(weby_wallet_encrypt_seed(wallet, "test_password") == 0)
 print("  OK")
 
 // Error handling

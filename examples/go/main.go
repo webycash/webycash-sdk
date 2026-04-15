@@ -1,6 +1,7 @@
 // webycash-sdk Go example — full wallet lifecycle
-// Build: CGO_LDFLAGS="-L../../native/target/release" go build
-// Run:   DYLD_LIBRARY_PATH=../../native/target/release ./main
+// Build/run from repo go module root:
+//   cd ../../go
+//   CGO_LDFLAGS="-L$(pwd)/../native/target/release -lwebycash_sdk" DYLD_LIBRARY_PATH="$(pwd)/../native/target/release" go run ../examples/go/main.go
 
 package main
 

@@ -1,6 +1,9 @@
 target/
 node_modules/
 dist/
+*.dylib
+*.so
+*.dll
 *.db
 .DS_Store
 *.class
@@ -13,3 +16,5 @@ build/
 .gradle/
 bin/
 obj/
+.swiftpm/
+swift/.build/

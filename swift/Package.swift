@@ -17,12 +17,22 @@ let package = Package(
         .target(
             name: "CWebycashSDK",
             path: "Sources/CWebycashSDK",
-            publicHeadersPath: "include"
+            publicHeadersPath: "include",
+            linkerSettings: [
+                .linkedLibrary("webycash_sdk"),
+                // Resolve after `cargo build --release` in ../native (CI stages the dylib there too).
+                .unsafeFlags(["-L../native/target/release"]),
+            ]
         ),
         .target(
             name: "WebycashSDK",
             dependencies: ["CWebycashSDK"],
             path: "Sources/WebycashSDK"
+        ),
+        .testTarget(
+            name: "WebycashSDKTests",
+            dependencies: ["WebycashSDK"],
+            path: "Tests/WebycashSDKTests"
         ),
     ]
 )

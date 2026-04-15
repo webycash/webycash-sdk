@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "webycash-sdk"
-version = "0.2.6"
+version = "0.2.7"
 description = "Webcash cross-platform SDK — Python bindings"
 readme = "README.md"
 license = {text = "MIT"}
@@ -21,6 +21,9 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/webycash/webycash-sdk"
 Repository = "https://github.com/webycash/webycash-sdk"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
 
 [tool.setuptools.packages.find]
 include = ["webycash_sdk*"]

@@ -1,5 +1,6 @@
 // webycash-sdk C# example — full wallet lifecycle
-// Run: dotnet run
+// Run (from repo root, native lib on DYLD_LIBRARY_PATH):
+//   DYLD_LIBRARY_PATH=native/target/release dotnet run --project examples/csharp/Example.csproj
 
 using WebycashSDK;
 
