@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.8
+
+- Release train bump; depends on **webylib** 0.2.x (lockfile picks latest compatible).
+- No FFI API changes.
+
 ## 0.2.7
 
 - Remove committed native `.dylib` artifacts from VCS; ignore `*.dylib` / `*.so` / `*.dll`.
