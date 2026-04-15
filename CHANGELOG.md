@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.13
+
+- **Kotlin / CI**: Add **`junit-platform-launcher`** to test runtime (Gradle 9 + JUnit Platform).
+
 ## 0.2.12
 
 - **CI**: crates.io gate uses a valid **`curl` User-Agent** (API returns 403 otherwise).

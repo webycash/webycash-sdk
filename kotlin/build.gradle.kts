@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "cash.weby"
-version = "0.2.12"
+version = "0.2.13"
 
 repositories { mavenCentral() }
 
@@ -12,6 +12,8 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.14.0")
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    // Gradle 9+ / JUnit Platform: launcher must be on test runtime classpath
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 tasks.test {
