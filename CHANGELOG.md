@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.12
+
+- **CI**: crates.io gate uses a valid **`curl` User-Agent** (API returns 403 otherwise).
+
 ## 0.2.11
 
 - **CI**: Gate workflow on **webylib** already published at the version pinned in `native/Cargo.toml` (release webylib first).
