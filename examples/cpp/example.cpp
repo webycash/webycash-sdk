@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <string>
+#include <regex>
 
 int main() {
     std::cout << "=== webycash-sdk C++ Example ===" << std::endl;
@@ -39,6 +40,35 @@ int main() {
             std::cout << "\n-- Check --" << std::endl;
             wallet.check_wallet();
             std::cout << "  OK" << std::endl;
+
+            std::cout << "\n-- Pay --" << std::endl;
+            try {
+                std::string paid = wallet.pay("0.00000001", "cpp-test");
+                size_t lim = paid.size() < 60 ? paid.size() : 60;
+                std::cout << "  " << paid.substr(0, lim) << std::endl;
+            } catch (const webcash::Error& e) {
+                std::cout << "  Pay skipped: " << e.what() << std::endl;
+            }
+
+            std::cout << "\n-- Merge --" << std::endl;
+            try {
+                std::cout << "  " << wallet.merge(20) << std::endl;
+            } catch (const webcash::Error& e) {
+                std::cout << "  Merge skipped: " << e.what() << std::endl;
+            }
+
+            std::cout << "\n-- Recover --" << std::endl;
+            try {
+                std::string snap = wallet.export_snapshot();
+                std::smatch m;
+                std::regex re(R"("master_secret"\s*:\s*"([0-9a-fA-F]{64})")");
+                if (std::regex_search(snap, m, re) && m.size() > 1)
+                    std::cout << "  " << wallet.recover(m[1].str(), 20) << std::endl;
+                else
+                    std::cout << "  Recover skipped: no master_secret" << std::endl;
+            } catch (const webcash::Error& e) {
+                std::cout << "  Recover skipped: " << e.what() << std::endl;
+            }
         } else {
             std::cout << "  Skipping server ops (set TEST_WEBCASH)" << std::endl;
         }

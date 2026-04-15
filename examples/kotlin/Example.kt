@@ -37,6 +37,30 @@ fun main() {
             println("\n-- Check --")
             wallet.check()
             println("  OK")
+
+            println("\n-- Pay --")
+            try {
+                println("  " + wallet.pay("0.00000001", "kotlin-test").take(60))
+            } catch (e: WebycashException) {
+                println("  Pay skipped: ${e.message}")
+            }
+
+            println("\n-- Merge --")
+            try {
+                println("  " + wallet.merge(20))
+            } catch (e: WebycashException) {
+                println("  Merge skipped: ${e.message}")
+            }
+
+            println("\n-- Recover --")
+            try {
+                val snap = wallet.exportSnapshot()
+                val hex = Regex(""""master_secret"\s*:\s*"([0-9a-fA-F]{64})"""").find(snap)?.groupValues?.getOrNull(1).orEmpty()
+                if (hex.isNotEmpty()) println("  " + wallet.recover(hex, 20))
+                else println("  Recover skipped: no master_secret")
+            } catch (e: WebycashException) {
+                println("  Recover skipped: ${e.message}")
+            }
         } else {
             println("  Skipping server ops (set TEST_WEBCASH)")
         }

@@ -35,6 +35,42 @@ using (var wallet = new Wallet(dbPath))
         Console.WriteLine("\n-- Check --");
         wallet.Check();
         Console.WriteLine("  OK");
+
+        Console.WriteLine("\n-- Pay --");
+        try
+        {
+            var paid = wallet.Pay("0.00000001", "csharp-test");
+            Console.WriteLine($"  {paid[..Math.Min(60, paid.Length)]}...");
+        }
+        catch (WebycashException e)
+        {
+            Console.WriteLine($"  Pay skipped: {e.Message}");
+        }
+
+        Console.WriteLine("\n-- Merge --");
+        try
+        {
+            Console.WriteLine($"  {wallet.Merge(20)}");
+        }
+        catch (WebycashException e)
+        {
+            Console.WriteLine($"  Merge skipped: {e.Message}");
+        }
+
+        Console.WriteLine("\n-- Recover --");
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(wallet.ExportSnapshot());
+            var hex = doc.RootElement.GetProperty("master_secret").GetString() ?? "";
+            if (hex.Length > 0)
+                Console.WriteLine($"  {wallet.Recover(hex, 20)}");
+            else
+                Console.WriteLine("  Recover skipped: no master_secret");
+        }
+        catch (WebycashException e)
+        {
+            Console.WriteLine($"  Recover skipped: {e.Message}");
+        }
     }
     else
     {

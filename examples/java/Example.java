@@ -36,6 +36,36 @@ public class Example {
                 System.out.println("\n-- Check --");
                 wallet.check();
                 System.out.println("  OK");
+
+                System.out.println("\n-- Pay --");
+                try {
+                    String paid = wallet.pay("0.00000001", "java-test");
+                    int lim = Math.min(60, paid.length());
+                    System.out.println("  " + paid.substring(0, lim));
+                } catch (WebycashSDK.WebycashException e) {
+                    System.out.println("  Pay skipped: " + e.getMessage());
+                }
+
+                System.out.println("\n-- Merge --");
+                try {
+                    System.out.println("  " + wallet.merge(20));
+                } catch (WebycashSDK.WebycashException e) {
+                    System.out.println("  Merge skipped: " + e.getMessage());
+                }
+
+                System.out.println("\n-- Recover --");
+                try {
+                    String snap = wallet.exportSnapshot();
+                    var m = java.util.regex.Pattern.compile("\"master_secret\"\\s*:\\s*\"([0-9a-fA-F]{64})\"")
+                            .matcher(snap);
+                    if (m.find()) {
+                        System.out.println("  " + wallet.recover(m.group(1), 20));
+                    } else {
+                        System.out.println("  Recover skipped: no master_secret");
+                    }
+                } catch (WebycashSDK.WebycashException e) {
+                    System.out.println("  Recover skipped: " + e.getMessage());
+                }
             } else {
                 System.out.println("  Skipping server ops (set TEST_WEBCASH)");
             }

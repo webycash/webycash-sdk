@@ -43,8 +43,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("\n-- Pay --");
         match wallet.pay(Amount::from_str("0.00000001")?, "rust-test").await {
-            Ok(msg) => println!("  {}", &msg[..60]),
+            Ok(msg) => println!("  {}", &msg[..msg.len().min(60)]),
             Err(e) => println!("  Pay skipped: {}", e),
+        }
+
+        println!("\n-- Merge --");
+        match wallet.merge(20).await {
+            Ok(msg) => println!("  {}", msg),
+            Err(e) => println!("  Merge skipped: {}", e),
+        }
+
+        println!("\n-- Recover --");
+        let snap = wallet.export_snapshot()?;
+        match wallet.recover(&snap.master_secret, 20).await {
+            Ok(r) => println!("  {}", r),
+            Err(e) => println!("  Recover skipped: {}", e),
         }
     } else {
         println!("  Skipping server ops (set TEST_WEBCASH)");

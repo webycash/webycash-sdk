@@ -6,6 +6,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -50,13 +51,44 @@ func main() {
 		} else {
 			b, _ := wallet.Balance()
 			fmt.Println("  Balance:", b)
-		}
 
-		fmt.Println("\n-- Check --")
-		if err := wallet.Check(); err != nil {
-			fmt.Println("  Check:", err)
-		} else {
-			fmt.Println("  OK")
+			fmt.Println("\n-- Check --")
+			if err := wallet.Check(); err != nil {
+				fmt.Println("  Check:", err)
+			} else {
+				fmt.Println("  OK")
+			}
+
+			fmt.Println("\n-- Pay --")
+			if out, err := wallet.Pay("0.00000001", "go-test"); err != nil {
+				fmt.Println("  Pay skipped:", err)
+			} else {
+				lim := len(out)
+				if lim > 60 {
+					lim = 60
+				}
+				fmt.Println(" ", out[:lim])
+			}
+
+			fmt.Println("\n-- Merge --")
+			if out, err := wallet.Merge(20); err != nil {
+				fmt.Println("  Merge skipped:", err)
+			} else {
+				fmt.Println(" ", out)
+			}
+
+			fmt.Println("\n-- Recover --")
+			snap, errSnap := wallet.ExportSnapshot()
+			var payload struct {
+				MasterSecret string `json:"master_secret"`
+			}
+			if errSnap != nil || json.Unmarshal([]byte(snap), &payload) != nil || payload.MasterSecret == "" {
+				fmt.Println("  Recover skipped: snapshot / master_secret")
+			} else if out, err := wallet.Recover(payload.MasterSecret, 20); err != nil {
+				fmt.Println("  Recover skipped:", err)
+			} else {
+				fmt.Println(" ", out)
+			}
 		}
 	} else {
 		fmt.Println("  Skipping server ops (set TEST_WEBCASH)")

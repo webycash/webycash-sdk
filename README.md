@@ -44,6 +44,8 @@
 | **Go** | Go modules | `go get github.com/webycash/webycash-sdk/go` |
 | **C/C++** | CMake | `FetchContent` or copy `include/webycash.h` + link `libwebycash_sdk` |
 
+Runnable programs (open wallet, insert / pay / merge / recover, snapshot, encrypt): **[examples/README.md](examples/README.md)**.
+
 ## Quick Start
 
 ### Python

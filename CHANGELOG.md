@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.9
+
+- **Examples**: `examples/README.md` index; Node `examples/node/example.cjs`; pay / merge / recover in multi-language samples when `TEST_WEBCASH` is set.
+- **Docs**: root README links to runnable examples.
+
 ## 0.2.8
 
 - Release train bump; depends on **webylib** 0.2.x (lockfile picks latest compatible).

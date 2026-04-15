@@ -82,6 +82,18 @@ def main():
                 except WebycashError as e:
                     print(f"  Merge skipped: {e}")
 
+                # Recover (64-hex master_secret from export_snapshot JSON)
+                print(f"\n── Recover ──")
+                try:
+                    snap = json.loads(w.export_snapshot())
+                    hex_secret = snap.get("master_secret") or ""
+                    if len(hex_secret) == 64:
+                        print(f"  {w.recover(hex_secret, gap_limit=20)}")
+                    else:
+                        print("  Recover skipped: no master_secret in snapshot")
+                except WebycashError as e:
+                    print(f"  Recover skipped: {e}")
+
             except WebycashError as e:
                 print(f"  Insert failed: {e}")
         else:
