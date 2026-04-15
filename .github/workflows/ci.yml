@@ -11,9 +11,33 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # ── Ensure webylib is already on crates.io before building the FFI bridge ──
+  webylib-on-crates-io:
+    name: webylib published (crates.io)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned webylib version exists on crates.io
+        shell: bash
+        run: |
+          set -euo pipefail
+          ver=$(grep -E '^webylib[[:space:]]*=' native/Cargo.toml | head -1 | sed -E 's/.*version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/')
+          if [[ -z "$ver" || "$ver" == *webylib* ]]; then
+            echo "Could not parse webylib version from native/Cargo.toml"
+            exit 1
+          fi
+          echo "native/Cargo.toml pins webylib $ver — checking crates.io…"
+          code=$(curl -sS -o /tmp/crates-webylib.json -w '%{http_code}' "https://crates.io/api/v1/crates/webylib/${ver}")
+          if [[ "$code" != "200" ]]; then
+            echo "webylib $ver is not on crates.io (HTTP $code). Release webylib first, wait for publish-crate, then tag webycash-sdk."
+            exit 1
+          fi
+          echo "OK: webylib $ver is published."
+
   # ── Build native libraries for all platforms ───────────────────
   native:
     name: Native (${{ matrix.target }})
+    needs: [webylib-on-crates-io]
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false

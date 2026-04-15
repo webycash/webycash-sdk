@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.11
+
+- **CI**: Gate workflow on **webylib** already published at the version pinned in `native/Cargo.toml` (release webylib first).
+- **Node**: Commit `node/package-lock.json` so `npm ci` works in binding tests (lockfile was excluded by some global gitignore configs).
+
 ## 0.2.10
 
 - **webylib**: Native crate now requires **webylib 0.2.6+** on crates.io (release **webylib** before tagging this SDK).

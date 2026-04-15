@@ -120,7 +120,7 @@ Encrypt the wallet database with a password using Argon2 key derivation + AES-25
 
 ### version()
 
-Get the library version string (e.g., `"0.2.10"`).
+Get the library version string (e.g., `"0.2.11"`).
 
 ### amountParse(str)
 
