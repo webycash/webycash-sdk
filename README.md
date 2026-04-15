@@ -46,6 +46,8 @@
 
 Runnable programs (open wallet, insert / pay / merge / recover, snapshot, encrypt): **[examples/README.md](examples/README.md)**.
 
+**Releasing:** Tag **[webylib](https://github.com/webycash/webylib)** first and wait until `cargo publish` completes on crates.io (`publish-crate` in webylib CI). Only then tag **webycash-sdk** so the native crate resolves the new **webylib** version.
+
 ## Quick Start
 
 ### Python

@@ -5,5 +5,5 @@ edition = "2021"
 publish = false
 
 [dependencies]
-webylib = { version = "0.2", features = ["ffi"] }
+webylib = { version = "0.2.6", features = ["ffi"] }
 tokio = { version = "1", features = ["full"] }

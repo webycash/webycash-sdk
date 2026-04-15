@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.10
+
+- **webylib**: Native crate now requires **webylib 0.2.6+** on crates.io (release **webylib** before tagging this SDK).
+- Dependency / lockfile aligned with published **webylib** 0.2.6.
+
 ## 0.2.9
 
 - **Examples**: `examples/README.md` index; Node `examples/node/example.cjs`; pay / merge / recover in multi-language samples when `TEST_WEBCASH` is set.
