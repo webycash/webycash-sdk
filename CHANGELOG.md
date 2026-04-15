@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.14
+
+- **Java**: Qualify FFI `check(rc)` calls as **`WebycashSDK.check`** so they do not collide with **`Wallet.check()`** (fixes Maven compile).
+
 ## 0.2.13
 
 - **Kotlin / CI**: Add **`junit-platform-launcher`** to test runtime (Gradle 9 + JUnit Platform).
