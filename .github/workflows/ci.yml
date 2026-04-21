@@ -200,7 +200,7 @@ jobs:
 
       - name: C++
         run: |
-          g++ -std=c++17 -I include cpp/test_smoke.cpp -L native-lib -lwebycash_sdk -o /tmp/webycash_cpp_smoke
+          g++ -std=c++17 -I include -I cpp/include cpp/test_smoke.cpp -L native-lib -lwebycash_sdk -o /tmp/webycash_cpp_smoke
           /tmp/webycash_cpp_smoke
 
       - name: Swift
