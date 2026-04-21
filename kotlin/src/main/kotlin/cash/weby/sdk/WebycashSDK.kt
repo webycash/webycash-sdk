@@ -37,7 +37,9 @@ private interface WebycashLib : Library {
 class WebycashException(val code: Int, message: String) : RuntimeException(message)
 
 private fun check(rc: Int) {
-    if (rc != 0) throw WebycashException(rc, WebycashLib.INSTANCE.weby_last_error_message() ?: "Error $rc")
+    if (rc != 0) {
+        throw WebycashException(rc, WebycashLib.INSTANCE.weby_last_error_message() ?: "Error $rc")
+    }
 }
 
 private fun takeString(ref: PointerByReference): String {
@@ -79,21 +81,87 @@ class Wallet private constructor(private var ptr: Pointer?) : Closeable {
         }
     }
 
-    override fun close() { ptr?.let { WebycashLib.INSTANCE.weby_wallet_free(it); ptr = null } }
+    override fun close() {
+        ptr?.let { WebycashLib.INSTANCE.weby_wallet_free(it); ptr = null }
+    }
 
-    fun balance(): String { val o = PointerByReference(); check(WebycashLib.INSTANCE.weby_wallet_balance(ptr!!, o)); return takeString(o) }
-    fun insert(webcash: String) { check(WebycashLib.INSTANCE.weby_wallet_insert(ptr!!, webcash)) }
-    fun pay(amount: String, memo: String = ""): String { val o = PointerByReference(); check(WebycashLib.INSTANCE.weby_wallet_pay(ptr!!, amount, memo, o)); return takeString(o) }
-    fun check() { cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_check(ptr!!)) }
-    fun merge(maxOutputs: Int = 20): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_merge(ptr!!, maxOutputs, o)); return takeString(o) }
-    fun recover(masterSecretHex: String, gapLimit: Int = 20): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_recover(ptr!!, masterSecretHex, gapLimit, o)); return takeString(o) }
-    fun stats(): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_stats(ptr!!, o)); return takeString(o) }
-    fun exportSnapshot(): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_export_snapshot(ptr!!, o)); return takeString(o) }
-    fun encryptSeed(password: String) { cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_encrypt_seed(ptr!!, password)) }
-    fun importSnapshot(json: String) { cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_import_snapshot(ptr!!, json)) }
-    fun listWebcash(): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_list_webcash(ptr!!, o)); return takeString(o) }
-    fun masterSecret(): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_master_secret(ptr!!, o)); return takeString(o) }
-    fun encryptWithPassword(password: String): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_encrypt_with_password(ptr!!, password, o)); return takeString(o) }
-    fun decryptWithPassword(encryptedJson: String, password: String) { cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_decrypt_with_password(ptr!!, encryptedJson, password)) }
-    fun recoverFromWallet(gapLimit: Int = 20): String { val o = PointerByReference(); cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_recover_from_wallet(ptr!!, gapLimit, o)); return takeString(o) }
+    fun balance(): String {
+        val o = PointerByReference()
+        check(WebycashLib.INSTANCE.weby_wallet_balance(ptr!!, o))
+        return takeString(o)
+    }
+
+    fun insert(webcash: String) {
+        check(WebycashLib.INSTANCE.weby_wallet_insert(ptr!!, webcash))
+    }
+
+    fun pay(amount: String, memo: String = ""): String {
+        val o = PointerByReference()
+        check(WebycashLib.INSTANCE.weby_wallet_pay(ptr!!, amount, memo, o))
+        return takeString(o)
+    }
+
+    fun check() {
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_check(ptr!!))
+    }
+
+    fun merge(maxOutputs: Int = 20): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_merge(ptr!!, maxOutputs, o))
+        return takeString(o)
+    }
+
+    fun recover(masterSecretHex: String, gapLimit: Int = 20): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_recover(ptr!!, masterSecretHex, gapLimit, o))
+        return takeString(o)
+    }
+
+    fun stats(): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_stats(ptr!!, o))
+        return takeString(o)
+    }
+
+    fun exportSnapshot(): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_export_snapshot(ptr!!, o))
+        return takeString(o)
+    }
+
+    fun encryptSeed(password: String) {
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_encrypt_seed(ptr!!, password))
+    }
+
+    fun importSnapshot(json: String) {
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_import_snapshot(ptr!!, json))
+    }
+
+    fun listWebcash(): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_list_webcash(ptr!!, o))
+        return takeString(o)
+    }
+
+    fun masterSecret(): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_master_secret(ptr!!, o))
+        return takeString(o)
+    }
+
+    fun encryptWithPassword(password: String): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_encrypt_with_password(ptr!!, password, o))
+        return takeString(o)
+    }
+
+    fun decryptWithPassword(encryptedJson: String, password: String) {
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_decrypt_with_password(ptr!!, encryptedJson, password))
+    }
+
+    fun recoverFromWallet(gapLimit: Int = 20): String {
+        val o = PointerByReference()
+        cash.weby.sdk.check(WebycashLib.INSTANCE.weby_wallet_recover_from_wallet(ptr!!, gapLimit, o))
+        return takeString(o)
+    }
 }

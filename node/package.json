@@ -1,6 +1,6 @@
 {
   "name": "webycash-sdk",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "Webcash SDK — Node.js, Browser, Deno, Bun (FFI + WASM)",
   "type": "module",
   "main": "dist/index.js",

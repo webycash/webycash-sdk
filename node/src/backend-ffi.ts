@@ -51,6 +51,16 @@ function takeString(val: unknown): string {
   return String(val);
 }
 
+/** Parse "Recovery completed! Webcash recovered: N, Total amount: X" */
+function parseRecoveryResult(s: string): RecoveryResult {
+  const countMatch = s.match(/recovered:\s*(\d+)/i);
+  const amountMatch = s.match(/amount:\s*([\d.]+)/i);
+  return {
+    recoveredCount: countMatch ? parseInt(countMatch[1], 10) : 0,
+    totalAmount: amountMatch ? BigInt(Math.round(parseFloat(amountMatch[1]) * 1e8)) : 0n,
+  };
+}
+
 function assertFfi(handle: WalletHandle): unknown {
   if (handle._tag !== "ffi") throw new Error("Expected FFI handle");
   return handle.ptr;
@@ -144,8 +154,11 @@ export class FfiBackend implements Backend {
   }
 
   async walletCheck(handle: WalletHandle): Promise<{ handle: WalletHandle; result: CheckResult }> {
+    // FFI check() only returns success/failure — no detailed counts available via C ABI
     check(ffi!.weby_wallet_check(assertFfi(handle)));
-    return { handle, result: { validCount: 0, spentCount: 0 } };
+    // Re-query stats to get actual counts post-check
+    const stats = await this.walletStats(handle);
+    return { handle, result: { validCount: stats.unspentWebcash, spentCount: stats.spentWebcash } };
   }
 
   async walletMerge(handle: WalletHandle, maxOutputs: number): Promise<{ handle: WalletHandle; message: string }> {
@@ -157,13 +170,13 @@ export class FfiBackend implements Backend {
   async walletRecover(handle: WalletHandle, masterSecretHex: string, gapLimit: number): Promise<{ handle: WalletHandle; result: RecoveryResult }> {
     const out = [null];
     check(ffi!.weby_wallet_recover(assertFfi(handle), masterSecretHex, gapLimit, out));
-    return { handle, result: { recoveredCount: 0, totalAmount: 0n } };
+    return { handle, result: parseRecoveryResult(takeString(out[0])) };
   }
 
   async walletRecoverFromWallet(handle: WalletHandle, gapLimit: number): Promise<{ handle: WalletHandle; result: RecoveryResult }> {
     const out = [null];
     check(ffi!.weby_wallet_recover_from_wallet(assertFfi(handle), gapLimit, out));
-    return { handle, result: { recoveredCount: 0, totalAmount: 0n } };
+    return { handle, result: parseRecoveryResult(takeString(out[0])) };
   }
 
   // ── Inspection ─────────────────────────────────────────────

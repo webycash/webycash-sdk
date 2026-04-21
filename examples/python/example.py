@@ -1,180 +1,270 @@
 #!/usr/bin/env python3
-"""webycash-sdk Python example — full wallet lifecycle."""
+"""
+webycash-sdk Python example -- complete webcash protocol reference.
+
+Usage (offline, no server needed):
+    python example.py
+
+Usage (with funded webcash for server operations):
+    TEST_WEBCASH='e1.00000000:secret:abc123...' python example.py
+
+Requires:
+    pip install webycash-sdk
+    (or run from repo with the native library built)
+"""
 
 import os
-import sys
 import json
 import tempfile
 from webycash_sdk import Wallet, version, amount_parse, amount_format, WebycashError
 
+
 def main():
-    print("=== webycash-sdk Python Example ===")
-    print(f"Library version: {version()}")
+    print("=== webycash-sdk Python Example ===\n")
 
-    # ── Amount utilities ─────────────────────────────────────────
-    print("\n── Amount utilities ──")
+    # ── 1. Version & utilities ──────────────────────────────────
+    print("-- 1. Version & utilities --")
+
+    v = version()
+    print(f"  SDK version: {v}")
+
+    # Parse a decimal webcash amount to its integer representation (wats).
+    # 1 webcash = 100,000,000 wats (8 decimal places, like satoshis).
     wats = amount_parse("1.5")
-    print(f"  parse('1.5') = {wats} wats")
-    s = amount_format(wats)
-    print(f"  format({wats}) = '{s}'")
-    assert wats == 150000000
-    assert s == "1.5"
-    print("  OK")
+    print(f"  amount_parse('1.5') = {wats} wats")
+    assert wats == 150_000_000, f"expected 150000000, got {wats}"
 
-    # ── Wallet lifecycle ─────────────────────────────────────────
-    db_path = os.path.join(tempfile.gettempdir(), "webycash_sdk_test.db")
-    if os.path.exists(db_path):
-        os.remove(db_path)
+    # Format wats back to a human-readable decimal string.
+    formatted = amount_format(wats)
+    print(f"  amount_format({wats}) = '{formatted}'")
+    assert formatted == "1.5", f"expected '1.5', got '{formatted}'"
 
-    print(f"\n── Open wallet: {db_path} ──")
+    # Smallest representable amount: 1 wat = 0.00000001 webcash.
+    one_wat = amount_parse("0.00000001")
+    print(f"  amount_parse('0.00000001') = {one_wat} wat")
+    assert one_wat == 1
+
+    print("  OK\n")
+
+    # ── 2. Create wallet ────────────────────────────────────────
+    print("-- 2. Create wallet --")
+
+    # Wallets are SQLite databases. The context manager ensures proper cleanup.
+    db_path = os.path.join(tempfile.gettempdir(), "webycash_example.db")
+    # Clean up any leftover from previous runs.
+    for suffix in ("", "-wal", "-shm"):
+        try:
+            os.remove(db_path + suffix)
+        except FileNotFoundError:
+            pass
+
     with Wallet(db_path) as w:
-        # Balance (empty wallet)
+        print(f"  Wallet created: {db_path}")
+        print(f"  Wallet is open and ready.\n")
+
+        # ── 3. Master secret backup ────────────────────────────
+        print("-- 3. Master secret backup --")
+
+        # The master secret is a 64-hex-char (32-byte) key that can regenerate
+        # all wallet addresses via HD derivation. This is the recovery seed.
+        # BACK THIS UP SECURELY -- losing it means losing funds.
+        secret = w.master_secret
+        print(f"  Master secret: {secret}")
+        print(f"  Length: {len(secret)} hex chars (32 bytes)")
+        assert len(secret) == 64
+        assert all(c in "0123456789abcdef" for c in secret)
+        print("  Store this offline. It can recover all wallet outputs.\n")
+
+        # ── 4. Balance & stats ──────────────────────────────────
+        print("-- 4. Balance & stats --")
+
         balance = w.balance()
-        print(f"  Balance (empty): {balance}")
-        assert balance == "0"
+        print(f"  Balance: {balance} webcash")
+        assert balance == "0", f"expected '0', got '{balance}'"
 
-        # Stats
-        stats = json.loads(w.stats())
-        print(f"  Stats: {stats}")
+        # Stats returns a JSON object with wallet metrics.
+        stats_json = w.stats()
+        stats = json.loads(stats_json)
+        print(f"  Stats: {json.dumps(stats, indent=4)}")
         assert stats["unspent_webcash"] == 0
+        print()
 
-        # Export snapshot (empty)
+        # ── 5. List outputs ─────────────────────────────────────
+        print("-- 5. List outputs --")
+
+        # list_webcash() returns a JSON array of all unspent webcash strings.
+        # Each string is a secret that controls funds on the server.
+        outputs_json = w.list_webcash()
+        outputs = json.loads(outputs_json)
+        print(f"  Unspent outputs: {len(outputs)}")
+        assert len(outputs) == 0, "new wallet should have no outputs"
+        print("  Empty wallet -- no outputs yet.\n")
+
+        # ── 6. Snapshot backup ──────────────────────────────────
+        print("-- 6. Snapshot backup --")
+
+        # export_snapshot() returns the full wallet state as JSON.
+        # This includes the master secret, all outputs, and metadata.
+        # Unlike the master secret alone, a snapshot restores instantly
+        # without needing to scan the server for derived outputs.
         snapshot = w.export_snapshot()
-        print(f"  Snapshot length: {len(snapshot)} chars")
-        assert len(snapshot) > 0
+        snap_parsed = json.loads(snapshot)
+        print(f"  Snapshot is valid JSON: {len(snapshot)} chars")
+        print(f"  Snapshot keys: {list(snap_parsed.keys())}")
+        print("  This is a full backup -- save it encrypted.\n")
 
-        # Insert webcash (use env var or skip)
+    # ── 7. Snapshot restore ─────────────────────────────────────
+    print("-- 7. Snapshot restore --")
+
+    # Open a second wallet and restore from the snapshot.
+    db_restore = os.path.join(tempfile.gettempdir(), "webycash_example_restore.db")
+    for suffix in ("", "-wal", "-shm"):
+        try:
+            os.remove(db_restore + suffix)
+        except FileNotFoundError:
+            pass
+
+    with Wallet(db_restore) as w2:
+        w2.import_snapshot(snapshot)
+        balance2 = w2.balance()
+        print(f"  Restored wallet balance: {balance2}")
+
+        # The restored wallet has the same master secret.
+        secret2 = w2.master_secret
+        assert secret2 == secret, "master secret must match after restore"
+        print(f"  Master secret matches original: {secret2[:16]}...")
+        print("  Snapshot restore complete.\n")
+
+    # Reopen the original wallet for remaining steps.
+    with Wallet(db_path) as w:
+
+        # ── 8. Password encryption ──────────────────────────────
+        print("-- 8. Password encryption --")
+
+        # encrypt_with_password() exports the wallet encrypted with a password.
+        # The result is a JSON blob that can be stored or transmitted safely.
+        password = "strongPassword123"
+        encrypted = w.encrypt_with_password(password)
+        enc_parsed = json.loads(encrypted)
+        print(f"  Encrypted blob: {len(encrypted)} chars")
+        print(f"  Encrypted keys: {list(enc_parsed.keys())}")
+        print("  This blob is safe to store -- it requires the password to decrypt.")
+
+        # decrypt_with_password() restores wallet state from the encrypted blob.
+        w.decrypt_with_password(encrypted, password)
+        balance_after = w.balance()
+        print(f"  Balance after decrypt: {balance_after}")
+        assert balance_after == "0", "balance must be preserved through encrypt/decrypt"
+        print("  Wallet works normally after decryption.\n")
+
+        # ── 9. Server operations (conditional) ──────────────────
+        print("-- 9. Server operations --")
+
         test_webcash = os.environ.get("TEST_WEBCASH")
-        if test_webcash:
-            print(f"\n── Insert webcash ──")
-            print(f"  Inserting: {test_webcash[:30]}...")
+        if not test_webcash:
+            print("  Skipped (set TEST_WEBCASH env var to run).")
+            print("  Example: TEST_WEBCASH='e1.00000000:secret:abc...' python example.py\n")
+        else:
+            # 9a. Insert webcash (receive payment).
+            # When someone sends you webcash, you call insert() with the secret
+            # string they gave you. The SDK verifies it with the server and
+            # re-derives it to a new secret only your wallet knows.
+            print(f"  Inserting: {test_webcash[:40]}...")
             try:
                 w.insert(test_webcash)
                 balance = w.balance()
-                print(f"  Balance after insert: {balance}")
-                assert float(balance) > 0
-
-                # Stats after insert
-                stats = json.loads(w.stats())
-                print(f"  Unspent: {stats['unspent_webcash']}")
-
-                # Pay (tiny amount back)
-                print(f"\n── Pay ──")
-                try:
-                    result = w.pay("0.00000001", "sdk-test")
-                    print(f"  Pay result: {result[:60]}...")
-                except WebycashError as e:
-                    print(f"  Pay skipped (insufficient or server error): {e}")
-
-                # Check
-                print(f"\n── Check ──")
-                try:
-                    w.check()
-                    print("  Check: OK")
-                except WebycashError as e:
-                    print(f"  Check: {e}")
-
-                # Merge
-                print(f"\n── Merge ──")
-                try:
-                    result = w.merge(20)
-                    print(f"  Merge: {result}")
-                except WebycashError as e:
-                    print(f"  Merge skipped: {e}")
-
-                # Recover (64-hex master_secret from export_snapshot JSON)
-                print(f"\n── Recover ──")
-                try:
-                    snap = json.loads(w.export_snapshot())
-                    hex_secret = snap.get("master_secret") or ""
-                    if len(hex_secret) == 64:
-                        print(f"  {w.recover(hex_secret, gap_limit=20)}")
-                    else:
-                        print("  Recover skipped: no master_secret in snapshot")
-                except WebycashError as e:
-                    print(f"  Recover skipped: {e}")
-
-                # Recover from wallet (uses stored master secret)
-                print(f"\n── Recover from wallet ──")
-                try:
-                    print(f"  {w.recover_from_wallet(gap_limit=20)}")
-                except WebycashError as e:
-                    print(f"  Recover from wallet skipped: {e}")
-
+                print(f"  Balance after insert: {balance} webcash")
+                assert float(balance) > 0, "balance should be positive after insert"
             except WebycashError as e:
                 print(f"  Insert failed: {e}")
-        else:
-            print("\n  Skipping server operations (set TEST_WEBCASH env var)")
+                print("  (The webcash may be already spent or invalid.)\n")
+                # Skip remaining server operations if insert failed.
+                test_webcash = None
 
-        # Import / export snapshot
-        print(f"\n── Import / export snapshot ──")
+        if test_webcash:
+            # 9b. Balance increased.
+            stats = json.loads(w.stats())
+            print(f"  Unspent outputs: {stats['unspent_webcash']}")
+
+            # 9c. Pay amount (create payment for someone else).
+            # pay() splits your webcash and returns a secret string.
+            # The recipient calls insert() with that string to claim the funds.
+            print("  Paying 0.00000001 webcash...")
+            try:
+                payment = w.pay("0.00000001", "example-payment")
+                # 9d. Show the payment webcash string.
+                print(f"  Payment webcash: {payment}")
+                print("  Send this string to the recipient.")
+                balance = w.balance()
+                print(f"  Balance after pay: {balance}")
+            except WebycashError as e:
+                print(f"  Pay failed: {e}")
+
+            # 9e. Check wallet against server.
+            # check() verifies all unspent outputs are still valid on the server.
+            print("  Checking wallet against server...")
+            try:
+                w.check()
+                print("  Check: all outputs valid.")
+            except WebycashError as e:
+                print(f"  Check: {e}")
+
+            # 9f. Merge outputs (reduce fragmentation).
+            # Over time, wallet accumulates many small outputs from change.
+            # merge() consolidates them into fewer, larger outputs.
+            print("  Merging outputs (max 20)...")
+            try:
+                result = w.merge(20)
+                print(f"  Merge result: {result}")
+            except WebycashError as e:
+                print(f"  Merge: {e}")
+
+            # 9g. List all unspent outputs.
+            outputs = json.loads(w.list_webcash())
+            print(f"  Unspent outputs after merge: {len(outputs)}")
+            for i, out in enumerate(outputs[:3]):
+                print(f"    [{i}] {out[:50]}...")
+            if len(outputs) > 3:
+                print(f"    ... and {len(outputs) - 3} more")
+
+            # 9h. Get updated stats.
+            stats = json.loads(w.stats())
+            print(f"  Final stats: {json.dumps(stats, indent=4)}")
+            print()
+
+        # ── 10. Recovery from master secret ─────────────────────
+        print("-- 10. Recovery from master secret --")
+
+        # recover_from_wallet() scans the server for outputs derived from
+        # this wallet's master secret. gap_limit controls how many empty
+        # derivation slots to check before stopping.
+        # This requires network access -- it will fail offline.
+        print("  Attempting recover_from_wallet(gap_limit=5)...")
         try:
-            snapshot = w.export_snapshot()
-            print(f"  Snapshot: {len(snapshot)} chars")
-            w.import_snapshot(snapshot)
-            print("  Import: OK")
+            result = w.recover_from_wallet(gap_limit=5)
+            print(f"  Recovery result: {result}")
         except WebycashError as e:
-            print(f"  Snapshot: {e}")
+            print(f"  Recovery failed (expected offline): {e}")
+        print()
 
-        # Master secret
-        print(f"\n── Master secret ──")
-        try:
-            secret = w.master_secret
-            print(f"  Master secret: {secret[:16]}... ({len(secret)} chars)")
-        except WebycashError as e:
-            print(f"  Master secret: {e}")
+    # ── 11. Cleanup ─────────────────────────────────────────────
+    print("-- 11. Cleanup --")
 
-        # List webcash
-        print(f"\n── List webcash ──")
-        try:
-            wc_list = json.loads(w.list_webcash())
-            print(f"  Unspent outputs: {len(wc_list)}")
-        except WebycashError as e:
-            print(f"  List webcash: {e}")
+    # Wallets are closed automatically by the context manager (with statement).
+    # Always close wallets when done to flush the SQLite WAL and release locks.
+    # In production, keep wallet files -- they are your funds.
+    for path in (db_path, db_restore):
+        for suffix in ("", "-wal", "-shm"):
+            try:
+                os.remove(path + suffix)
+            except FileNotFoundError:
+                pass
 
-        # Encrypt seed
-        print(f"\n── Encrypt seed ──")
-        try:
-            w.encrypt_seed("test_password_123")
-            print("  Seed encrypted: OK")
-        except WebycashError as e:
-            print(f"  Encrypt: {e}")
+    print("  Temporary wallet files removed.")
+    print("  In production, wallet files ARE your funds -- protect them.\n")
 
-        # Encrypt / decrypt with password
-        print(f"\n── Encrypt / decrypt with password ──")
-        try:
-            encrypted = w.encrypt_with_password("test_password_123")
-            print(f"  Encrypted: {len(encrypted)} chars")
-            w.decrypt_with_password(encrypted, "test_password_123")
-            print("  Decrypt: OK")
-        except WebycashError as e:
-            print(f"  Encrypt/decrypt: {e}")
+    print("=== Example complete ===")
 
-    # ── Open with seed ───────────────────────────────────────────
-    print(f"\n── Open with seed ──")
-    seed = bytes.fromhex("aa" * 32)
-    db_seed = os.path.join(tempfile.gettempdir(), "webycash_sdk_seed_test.db")
-    if os.path.exists(db_seed):
-        os.remove(db_seed)
-    with Wallet(db_seed, seed=seed) as w:
-        balance = w.balance()
-        print(f"  Balance (seed wallet): {balance}")
-
-    # ── Error handling ───────────────────────────────────────────
-    print(f"\n── Error handling ──")
-    try:
-        with Wallet(db_path) as w:
-            w.insert("invalid_webcash_string")
-    except WebycashError as e:
-        print(f"  Caught expected error: {e}")
-
-    # Cleanup
-    for f in [db_path, db_seed, db_path + "-wal", db_path + "-shm",
-              db_seed + "-wal", db_seed + "-shm"]:
-        if os.path.exists(f):
-            os.remove(f)
-
-    print("\n=== All tests passed ===")
 
 if __name__ == "__main__":
     main()
