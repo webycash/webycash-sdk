@@ -64,10 +64,10 @@ with Wallet("my_wallet.db") as w:
 ```typescript
 import { Wallet } from "webycash-sdk";
 
-const wallet = new Wallet("my_wallet.db");
-console.log(wallet.balance());
-wallet.insert("e1.00000000:secret:abc...");
-const payment = wallet.pay("0.5", "coffee");
+const wallet = await Wallet.open("my_wallet.db");
+console.log(await wallet.balance());
+await wallet.insert("e1.00000000:secret:abc...");
+const payment = await wallet.pay("0.5", "coffee");
 wallet.close();
 ```
 
@@ -145,6 +145,7 @@ try (var wallet = new WebycashSDK.Wallet("my_wallet.db")) {
 | **watchOS** | aarch64 | Swift |
 | **tvOS** | aarch64 | Swift |
 | **visionOS** | aarch64 | Swift |
+| **Browser** | wasm32 | TypeScript, JavaScript |
 | **FreeBSD** | x86_64 | Rust, C/C++, Go |
 
 ## Architecture
@@ -186,6 +187,7 @@ try (var wallet = new WebycashSDK.Wallet("my_wallet.db")) {
 | [C# / .NET](docs/csharp.md) | NuGet install, P/Invoke, Unity |
 | [Go](docs/go.md) | Go modules, cgo bindings |
 | [C / C++](docs/cpp.md) | CMake, header-only C++ wrapper, memory rules |
+| [WASM / Browser](docs/wasm.md) | WebAssembly bindings, Vite/webpack, browser wallets |
 
 ## Building from Source
 
@@ -193,8 +195,11 @@ try (var wallet = new WebycashSDK.Wallet("my_wallet.db")) {
 # Build the native library
 cd native
 cargo build --release
-
 # Output: target/release/libwebycash_sdk.{so,dylib,dll}
+
+# Build the WASM package
+./scripts/build-wasm.sh
+# Output: node/wasm/webycash_sdk_wasm.{js,wasm,d.ts}
 ```
 
 ## License
