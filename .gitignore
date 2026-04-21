@@ -2,7 +2,8 @@ target/
 .cargo/
 node_modules/
 dist/
-node/wasm/
+node/wasm/*.js
+node/wasm/*.wasm
 *.dylib
 *.so
 *.dll
