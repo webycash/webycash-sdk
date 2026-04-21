@@ -94,10 +94,43 @@ def main():
                 except WebycashError as e:
                     print(f"  Recover skipped: {e}")
 
+                # Recover from wallet (uses stored master secret)
+                print(f"\n── Recover from wallet ──")
+                try:
+                    print(f"  {w.recover_from_wallet(gap_limit=20)}")
+                except WebycashError as e:
+                    print(f"  Recover from wallet skipped: {e}")
+
             except WebycashError as e:
                 print(f"  Insert failed: {e}")
         else:
             print("\n  Skipping server operations (set TEST_WEBCASH env var)")
+
+        # Import / export snapshot
+        print(f"\n── Import / export snapshot ──")
+        try:
+            snapshot = w.export_snapshot()
+            print(f"  Snapshot: {len(snapshot)} chars")
+            w.import_snapshot(snapshot)
+            print("  Import: OK")
+        except WebycashError as e:
+            print(f"  Snapshot: {e}")
+
+        # Master secret
+        print(f"\n── Master secret ──")
+        try:
+            secret = w.master_secret
+            print(f"  Master secret: {secret[:16]}... ({len(secret)} chars)")
+        except WebycashError as e:
+            print(f"  Master secret: {e}")
+
+        # List webcash
+        print(f"\n── List webcash ──")
+        try:
+            wc_list = json.loads(w.list_webcash())
+            print(f"  Unspent outputs: {len(wc_list)}")
+        except WebycashError as e:
+            print(f"  List webcash: {e}")
 
         # Encrypt seed
         print(f"\n── Encrypt seed ──")
@@ -106,6 +139,16 @@ def main():
             print("  Seed encrypted: OK")
         except WebycashError as e:
             print(f"  Encrypt: {e}")
+
+        # Encrypt / decrypt with password
+        print(f"\n── Encrypt / decrypt with password ──")
+        try:
+            encrypted = w.encrypt_with_password("test_password_123")
+            print(f"  Encrypted: {len(encrypted)} chars")
+            w.decrypt_with_password(encrypted, "test_password_123")
+            print("  Decrypt: OK")
+        except WebycashError as e:
+            print(f"  Encrypt/decrypt: {e}")
 
     # ── Open with seed ───────────────────────────────────────────
     print(f"\n── Open with seed ──")

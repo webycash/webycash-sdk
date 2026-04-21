@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.0
+
+### Breaking Changes
+- **Node.js**: API is now fully async. `Wallet.open()` replaces `new Wallet()`. All methods return `Promise`.
+- **Node.js**: Package is ESM (`"type": "module"`). Import from `webycash-sdk`.
+
+### New Features
+- **WASM**: Full WebAssembly support for browser and Node.js. New `wasm/` crate built with `wasm-pack`.
+- **Node.js**: Dual backend architecture — auto-detects FFI (native) or WASM (browser/fallback).
+- **All languages**: 6 new wallet operations:
+  - `importSnapshot(json)` — restore wallet from backup
+  - `listWebcash()` — list all unspent outputs
+  - `masterSecret()` — get HD master secret hex
+  - `encryptWithPassword(password)` — full wallet encryption (Argon2id + AES-256-GCM)
+  - `decryptWithPassword(encryptedJson, password)` — decrypt wallet
+  - `recoverFromWallet(gapLimit)` — recover using stored seed
+- **Node.js**: Standalone crypto utilities — `deriveSecret`, `generateMasterSecret`, `sha256Hex`, `secretToPublic`, `parseWebcash`, `formatWebcash`, `formatPublicWebcash`.
+- **CI**: WASM build job, WASM included in npm publish and GitHub release.
+
+### Improvements
+- **All languages**: Comprehensive test suite — 10 tests per language, inspired by PWA workflows.
+- **webylib**: Pinned to 0.3.12 (latest).
+- **Docs**: Full API reference for new operations, WASM guide, updated per-language docs.
+
 ## 0.2.14
 
 - **Java**: Qualify FFI `check(rc)` calls as **`WebycashSDK.check`** so they do not collide with **`Wallet.check()`** (fixes Maven compile).

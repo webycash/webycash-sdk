@@ -116,6 +116,62 @@ Encrypt the wallet database with a password using Argon2 key derivation + AES-25
 |-----------|------|-------------|
 | `password` | string | Encryption password |
 
+### Wallet.importSnapshot(json)
+
+Import wallet state from a JSON snapshot string. Overwrites current wallet state.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `json` | string | JSON from `exportSnapshot()` |
+
+**Returns:** void.
+**Errors:** `InvalidInput` if JSON is invalid.
+
+### Wallet.listWebcash()
+
+List all unspent webcash as a JSON array of strings.
+
+**Returns:** string — JSON array (e.g., `["e1.00:secret:abc..."]`). Empty wallet returns `"[]"`.
+
+### Wallet.masterSecret()
+
+Get the wallet master secret as a 64-character hex string. Used for backup/recovery.
+
+**Returns:** string — 64-character hex master secret.
+
+### Wallet.encryptWithPassword(password)
+
+Encrypt the full wallet data with a password. Uses Argon2id key derivation + AES-256-GCM.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `password` | string | Encryption password |
+
+**Returns:** string — encrypted JSON blob.
+
+### Wallet.decryptWithPassword(encryptedJson, password)
+
+Decrypt wallet from an encrypted JSON blob produced by `encryptWithPassword`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `encryptedJson` | string | Encrypted blob from `encryptWithPassword()` |
+| `password` | string | Decryption password |
+
+**Returns:** void.
+**Errors:** `CryptoError` if wrong password or corrupted data.
+
+### Wallet.recoverFromWallet(gapLimit)
+
+Recover wallet outputs using the stored master secret. Scans the server for used derivation paths.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `gapLimit` | integer | `20` | How many consecutive empty paths before stopping |
+
+**Returns:** string — recovery summary (count and amount recovered).
+**Errors:** `NetworkError` if the server is unreachable.
+
 ## Utility Functions
 
 ### version()

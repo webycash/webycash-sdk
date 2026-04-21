@@ -18,6 +18,12 @@ extern int32_t weby_wallet_recover(const void *wallet, const char *secret, uint3
 extern int32_t weby_wallet_stats(const void *wallet, char **out);
 extern int32_t weby_wallet_export_snapshot(const void *wallet, char **out);
 extern int32_t weby_wallet_encrypt_seed(const void *wallet, const char *password);
+extern int32_t weby_wallet_import_snapshot(const void *wallet, const char *json);
+extern int32_t weby_wallet_list_webcash(const void *wallet, char **out);
+extern int32_t weby_wallet_master_secret(const void *wallet, char **out);
+extern int32_t weby_wallet_encrypt_with_password(const void *wallet, const char *password, char **out);
+extern int32_t weby_wallet_decrypt_with_password(const void *wallet, const char *json, const char *password);
+extern int32_t weby_wallet_recover_from_wallet(const void *wallet, uint32_t gap, char **out);
 extern const char *weby_version();
 extern const char *weby_last_error_message();
 extern int32_t weby_amount_parse(const char *s, int64_t *out);
@@ -177,6 +183,54 @@ func (w *Wallet) EncryptSeed(password string) error {
 	cs := C.CString(password)
 	defer C.free(unsafe.Pointer(cs))
 	return check(C.weby_wallet_encrypt_seed(w.ptr, cs))
+}
+
+func (w *Wallet) ImportSnapshot(json string) error {
+	cs := C.CString(json)
+	defer C.free(unsafe.Pointer(cs))
+	return check(C.weby_wallet_import_snapshot(w.ptr, cs))
+}
+
+func (w *Wallet) ListWebcash() (string, error) {
+	var out *C.char
+	if err := check(C.weby_wallet_list_webcash(w.ptr, &out)); err != nil {
+		return "", err
+	}
+	return takeString(out), nil
+}
+
+func (w *Wallet) MasterSecret() (string, error) {
+	var out *C.char
+	if err := check(C.weby_wallet_master_secret(w.ptr, &out)); err != nil {
+		return "", err
+	}
+	return takeString(out), nil
+}
+
+func (w *Wallet) EncryptWithPassword(password string) (string, error) {
+	cs := C.CString(password)
+	defer C.free(unsafe.Pointer(cs))
+	var out *C.char
+	if err := check(C.weby_wallet_encrypt_with_password(w.ptr, cs, &out)); err != nil {
+		return "", err
+	}
+	return takeString(out), nil
+}
+
+func (w *Wallet) DecryptWithPassword(encryptedJson, password string) error {
+	cj := C.CString(encryptedJson)
+	defer C.free(unsafe.Pointer(cj))
+	cp := C.CString(password)
+	defer C.free(unsafe.Pointer(cp))
+	return check(C.weby_wallet_decrypt_with_password(w.ptr, cj, cp))
+}
+
+func (w *Wallet) RecoverFromWallet(gapLimit uint32) (string, error) {
+	var out *C.char
+	if err := check(C.weby_wallet_recover_from_wallet(w.ptr, C.uint32_t(gapLimit), &out)); err != nil {
+		return "", err
+	}
+	return takeString(out), nil
 }
 
 func init() {

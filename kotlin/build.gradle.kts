@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "cash.weby"
-version = "0.2.14"
+version = "0.3.0"
 
 repositories { mavenCentral() }
 

@@ -76,11 +76,44 @@ function main() {
 				} catch (e) {
 					console.log('  Recover skipped:', e.message);
 				}
+
+				console.log('\n-- Recover from wallet --');
+				try {
+					console.log(' ', w.recoverFromWallet(20));
+				} catch (e) {
+					console.log('  Recover from wallet skipped:', e.message);
+				}
 			} catch (e) {
 				console.log('  Insert failed:', e.message);
 			}
 		} else {
 			console.log('\n  Skipping server operations (set TEST_WEBCASH)');
+		}
+
+		console.log('\n-- Export / import snapshot --');
+		try {
+			const snapshot = w.exportSnapshot();
+			console.log(`  Snapshot: ${snapshot.length} chars`);
+			w.importSnapshot(snapshot);
+			console.log('  Import: OK');
+		} catch (e) {
+			console.log('  Snapshot:', e.message);
+		}
+
+		console.log('\n-- Master secret --');
+		try {
+			const secret = w.masterSecret();
+			console.log(`  Master secret: ${secret.slice(0, 16)}... (${secret.length} chars)`);
+		} catch (e) {
+			console.log('  Master secret:', e.message);
+		}
+
+		console.log('\n-- List webcash --');
+		try {
+			const list = w.listWebcash();
+			console.log(`  Unspent outputs: ${JSON.parse(list).length}`);
+		} catch (e) {
+			console.log('  List webcash:', e.message);
 		}
 
 		console.log('\n-- Encrypt seed --');
@@ -89,6 +122,16 @@ function main() {
 			console.log('  OK');
 		} catch (e) {
 			console.log('  Encrypt:', e.message);
+		}
+
+		console.log('\n-- Encrypt / decrypt with password --');
+		try {
+			const encrypted = w.encryptWithPassword('test_password_123');
+			console.log(`  Encrypted: ${encrypted.length} chars`);
+			w.decryptWithPassword(encrypted, 'test_password_123');
+			console.log('  Decrypt: OK');
+		} catch (e) {
+			console.log('  Encrypt/decrypt:', e.message);
 		}
 
 		console.log('\n-- Error handling --');

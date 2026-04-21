@@ -24,6 +24,12 @@ public class WebycashSDK {
         int weby_wallet_stats(Pointer wallet, PointerByReference out);
         int weby_wallet_export_snapshot(Pointer wallet, PointerByReference out);
         int weby_wallet_encrypt_seed(Pointer wallet, String password);
+        int weby_wallet_import_snapshot(Pointer wallet, String json);
+        int weby_wallet_list_webcash(Pointer wallet, PointerByReference out);
+        int weby_wallet_master_secret(Pointer wallet, PointerByReference out);
+        int weby_wallet_encrypt_with_password(Pointer wallet, String password, PointerByReference out);
+        int weby_wallet_decrypt_with_password(Pointer wallet, String json, String password);
+        int weby_wallet_recover_from_wallet(Pointer wallet, int gapLimit, PointerByReference out);
         String weby_version();
         String weby_last_error_message();
         int weby_amount_parse(String amountStr, long[] out);
@@ -88,5 +94,11 @@ public class WebycashSDK {
         public String stats() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_stats(ptr, o)); return takeString(o); }
         public String exportSnapshot() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_export_snapshot(ptr, o)); return takeString(o); }
         public void encryptSeed(String password) { WebycashSDK.check(Lib.INSTANCE.weby_wallet_encrypt_seed(ptr, password)); }
+        public void importSnapshot(String json) { WebycashSDK.check(Lib.INSTANCE.weby_wallet_import_snapshot(ptr, json)); }
+        public String listWebcash() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_list_webcash(ptr, o)); return takeString(o); }
+        public String masterSecret() { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_master_secret(ptr, o)); return takeString(o); }
+        public String encryptWithPassword(String password) { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_encrypt_with_password(ptr, password, o)); return takeString(o); }
+        public void decryptWithPassword(String encryptedJson, String password) { WebycashSDK.check(Lib.INSTANCE.weby_wallet_decrypt_with_password(ptr, encryptedJson, password)); }
+        public String recoverFromWallet(int gapLimit) { PointerByReference o = new PointerByReference(); WebycashSDK.check(Lib.INSTANCE.weby_wallet_recover_from_wallet(ptr, gapLimit, o)); return takeString(o); }
     }
 }

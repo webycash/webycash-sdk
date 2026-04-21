@@ -57,10 +57,34 @@ async function main() {
         console.log('  Skipping server ops (set TEST_WEBCASH)');
     }
 
+    // Export / import snapshot
+    console.log('\n-- Export / import snapshot --');
+    const snapshot = wallet.exportSnapshot();
+    console.log(`  Snapshot: ${snapshot.length} chars`);
+    wallet.importSnapshot(snapshot);
+    console.log('  Import: OK');
+
+    // Master secret
+    console.log('\n-- Master secret --');
+    const secret = wallet.masterSecret();
+    console.log(`  Master secret: ${secret.substring(0, 16)}... (${secret.length} chars)`);
+
+    // List webcash
+    console.log('\n-- List webcash --');
+    const list = JSON.parse(wallet.listWebcash());
+    console.log(`  Unspent outputs: ${list.length}`);
+
     // Encrypt seed
     console.log('\n-- Encrypt seed --');
     wallet.encryptSeed('test_password');
     console.log('  OK');
+
+    // Encrypt / decrypt with password
+    console.log('\n-- Encrypt / decrypt with password --');
+    const encrypted = wallet.encryptWithPassword('test_password');
+    console.log(`  Encrypted: ${encrypted.length} chars`);
+    wallet.decryptWithPassword(encrypted, 'test_password');
+    console.log('  Decrypt: OK');
 
     // Error handling
     console.log('\n-- Error handling --');

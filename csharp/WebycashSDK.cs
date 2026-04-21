@@ -25,6 +25,12 @@ namespace WebycashSDK
         [DllImport(LIB)] public static extern int weby_wallet_stats(IntPtr wallet, out IntPtr json);
         [DllImport(LIB)] public static extern int weby_wallet_export_snapshot(IntPtr wallet, out IntPtr json);
         [DllImport(LIB)] public static extern int weby_wallet_encrypt_seed(IntPtr wallet, string password);
+        [DllImport(LIB)] public static extern int weby_wallet_import_snapshot(IntPtr wallet, string json);
+        [DllImport(LIB)] public static extern int weby_wallet_list_webcash(IntPtr wallet, out IntPtr json);
+        [DllImport(LIB)] public static extern int weby_wallet_master_secret(IntPtr wallet, out IntPtr hex);
+        [DllImport(LIB)] public static extern int weby_wallet_encrypt_with_password(IntPtr wallet, string password, out IntPtr json);
+        [DllImport(LIB)] public static extern int weby_wallet_decrypt_with_password(IntPtr wallet, string json, string password);
+        [DllImport(LIB)] public static extern int weby_wallet_recover_from_wallet(IntPtr wallet, uint gapLimit, out IntPtr result);
         [DllImport(LIB)] public static extern IntPtr weby_version();
         [DllImport(LIB)] public static extern IntPtr weby_last_error_message();
         [DllImport(LIB)] public static extern int weby_amount_parse(string amountStr, out long wats);
@@ -92,5 +98,11 @@ namespace WebycashSDK
         public string Stats() { WebycashSDK.Ffi.Rc(Native.weby_wallet_stats(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
         public string ExportSnapshot() { WebycashSDK.Ffi.Rc(Native.weby_wallet_export_snapshot(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
         public void EncryptSeed(string password) { WebycashSDK.Ffi.Rc(Native.weby_wallet_encrypt_seed(_ptr, password)); }
+        public void ImportSnapshot(string json) { WebycashSDK.Ffi.Rc(Native.weby_wallet_import_snapshot(_ptr, json)); }
+        public string ListWebcash() { WebycashSDK.Ffi.Rc(Native.weby_wallet_list_webcash(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public string MasterSecret() { WebycashSDK.Ffi.Rc(Native.weby_wallet_master_secret(_ptr, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public string EncryptWithPassword(string password) { WebycashSDK.Ffi.Rc(Native.weby_wallet_encrypt_with_password(_ptr, password, out var p)); return WebycashSDK.Ffi.TakeString(p); }
+        public void DecryptWithPassword(string encryptedJson, string password) { WebycashSDK.Ffi.Rc(Native.weby_wallet_decrypt_with_password(_ptr, encryptedJson, password)); }
+        public string RecoverFromWallet(uint gapLimit = 20) { WebycashSDK.Ffi.Rc(Native.weby_wallet_recover_from_wallet(_ptr, gapLimit, out var p)); return WebycashSDK.Ffi.TakeString(p); }
     }
 }

@@ -110,6 +110,38 @@ public:
     void encrypt_seed(const std::string& password) {
         webcash::check(weby_wallet_encrypt_seed(ptr_, password.c_str()));
     }
+
+    void import_snapshot(const std::string& json) {
+        webcash::check(weby_wallet_import_snapshot(ptr_, json.c_str()));
+    }
+
+    std::string list_webcash() {
+        char* out = nullptr;
+        webcash::check(weby_wallet_list_webcash(ptr_, &out));
+        return take_string(out);
+    }
+
+    std::string master_secret() {
+        char* out = nullptr;
+        webcash::check(weby_wallet_master_secret(ptr_, &out));
+        return take_string(out);
+    }
+
+    std::string encrypt_with_password(const std::string& password) {
+        char* out = nullptr;
+        webcash::check(weby_wallet_encrypt_with_password(ptr_, password.c_str(), &out));
+        return take_string(out);
+    }
+
+    void decrypt_with_password(const std::string& encrypted_json, const std::string& password) {
+        webcash::check(weby_wallet_decrypt_with_password(ptr_, encrypted_json.c_str(), password.c_str()));
+    }
+
+    std::string recover_from_wallet(uint32_t gap_limit = 20) {
+        char* out = nullptr;
+        webcash::check(weby_wallet_recover_from_wallet(ptr_, gap_limit, &out));
+        return take_string(out);
+    }
 };
 
 } // namespace webcash

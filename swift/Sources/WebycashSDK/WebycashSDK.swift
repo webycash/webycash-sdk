@@ -96,6 +96,38 @@ public final class Wallet {
     public func encryptSeed(password: String) throws {
         try ffiCheck(weby_wallet_encrypt_seed(ptr, password))
     }
+
+    public func importSnapshot(_ json: String) throws {
+        try ffiCheck(weby_wallet_import_snapshot(ptr, json))
+    }
+
+    public func listWebcash() throws -> String {
+        var out: UnsafeMutablePointer<CChar>?
+        try ffiCheck(weby_wallet_list_webcash(ptr, &out))
+        return takeString(out)
+    }
+
+    public func masterSecret() throws -> String {
+        var out: UnsafeMutablePointer<CChar>?
+        try ffiCheck(weby_wallet_master_secret(ptr, &out))
+        return takeString(out)
+    }
+
+    public func encryptWithPassword(_ password: String) throws -> String {
+        var out: UnsafeMutablePointer<CChar>?
+        try ffiCheck(weby_wallet_encrypt_with_password(ptr, password, &out))
+        return takeString(out)
+    }
+
+    public func decryptWithPassword(encryptedJSON: String, password: String) throws {
+        try ffiCheck(weby_wallet_decrypt_with_password(ptr, encryptedJSON, password))
+    }
+
+    public func recoverFromWallet(gapLimit: UInt32 = 20) throws -> String {
+        var out: UnsafeMutablePointer<CChar>?
+        try ffiCheck(weby_wallet_recover_from_wallet(ptr, gapLimit, &out))
+        return takeString(out)
+    }
 }
 
 /// Get the library version.

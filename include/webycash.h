@@ -79,6 +79,38 @@ int32_t weby_wallet_export_snapshot(const WebyWallet *wallet, char **out_json);
 
 int32_t weby_wallet_encrypt_seed(const WebyWallet *wallet, const char *password);
 
+int32_t weby_wallet_encrypt_with_password(
+    const WebyWallet *wallet,
+    const char *password,
+    char **out_json
+);
+
+int32_t weby_wallet_decrypt_with_password(
+    const WebyWallet *wallet,
+    const char *encrypted_json,
+    const char *password
+);
+
+/* ── Listing ─────────────────────────────────────────────────── */
+
+int32_t weby_wallet_list_webcash(const WebyWallet *wallet, char **out_json);
+
+/* ── Master Secret ───────────────────────────────────────────── */
+
+int32_t weby_wallet_master_secret(const WebyWallet *wallet, char **out_hex);
+
+/* ── Snapshot Import ─────────────────────────────────────────── */
+
+int32_t weby_wallet_import_snapshot(const WebyWallet *wallet, const char *json);
+
+/* ── Recovery from Stored Seed ───────────────────────────────── */
+
+int32_t weby_wallet_recover_from_wallet(
+    const WebyWallet *wallet,
+    uint32_t gap_limit,
+    char **out_result
+);
+
 /* ── Utilities ───────────────────────────────────────────────── */
 
 const char *weby_version(void);

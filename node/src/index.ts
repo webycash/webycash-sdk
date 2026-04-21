@@ -1,154 +1,75 @@
-import koffi from "koffi";
-import path from "path";
-import os from "os";
-
-const LIB_NAME: Record<string, string> = {
-  linux: "libwebycash_sdk.so",
-  darwin: "libwebycash_sdk.dylib",
-  win32: "webycash_sdk.dll",
-};
-
-function findLib(): string {
-  const name = LIB_NAME[os.platform()];
-  if (!name) throw new Error(`Unsupported platform: ${os.platform()}`);
-  // Check next to this module first
-  const local = path.join(__dirname, "..", name);
-  try { require("fs").accessSync(local); return local; } catch {}
-  return name; // Fall back to system search
-}
-
-const lib = koffi.load(findLib());
-
-// ── FFI declarations ────────────────────────────────────────────
-
-const WebyWalletPtr = koffi.pointer("WebyWallet", koffi.opaque());
-
-const ffi = {
-  weby_wallet_open: lib.func("int32_t weby_wallet_open(const char*, _Out_ WebyWallet**)"),
-  weby_wallet_open_with_seed: lib.func("int32_t weby_wallet_open_with_seed(const char*, const uint8_t*, size_t, _Out_ WebyWallet**)"),
-  weby_wallet_free: lib.func("void weby_wallet_free(WebyWallet*)"),
-  weby_wallet_balance: lib.func("int32_t weby_wallet_balance(const WebyWallet*, _Out_ char**)"),
-  weby_wallet_insert: lib.func("int32_t weby_wallet_insert(const WebyWallet*, const char*)"),
-  weby_wallet_pay: lib.func("int32_t weby_wallet_pay(const WebyWallet*, const char*, const char*, _Out_ char**)"),
-  weby_wallet_check: lib.func("int32_t weby_wallet_check(const WebyWallet*)"),
-  weby_wallet_merge: lib.func("int32_t weby_wallet_merge(const WebyWallet*, uint32_t, _Out_ char**)"),
-  weby_wallet_recover: lib.func("int32_t weby_wallet_recover(const WebyWallet*, const char*, uint32_t, _Out_ char**)"),
-  weby_wallet_stats: lib.func("int32_t weby_wallet_stats(const WebyWallet*, _Out_ char**)"),
-  weby_wallet_export_snapshot: lib.func("int32_t weby_wallet_export_snapshot(const WebyWallet*, _Out_ char**)"),
-  weby_wallet_encrypt_seed: lib.func("int32_t weby_wallet_encrypt_seed(const WebyWallet*, const char*)"),
-  weby_version: lib.func("const char* weby_version()"),
-  weby_last_error_message: lib.func("const char* weby_last_error_message()"),
-  weby_amount_parse: lib.func("int32_t weby_amount_parse(const char*, _Out_ int64_t*)"),
-  weby_amount_format: lib.func("int32_t weby_amount_format(int64_t, _Out_ char**)"),
-  weby_free_string: lib.func("void weby_free_string(char*)"),
-};
-
-// ── Helpers ─────────────────────────────────────────────────────
-
-export class WebycashError extends Error {
-  constructor(public code: number, message: string) {
-    super(message);
-    this.name = "WebycashError";
-  }
-}
-
-function check(rc: number): void {
-  if (rc !== 0) {
-    const msg = ffi.weby_last_error_message();
-    throw new WebycashError(rc, msg ?? `Error code ${rc}`);
-  }
-}
-
-function takeString(val: any): string {
-  // koffi _Out_ char** returns the string directly in the output array
-  if (val == null) return "";
-  return String(val);
-}
-
 // ── Public API ──────────────────────────────────────────────────
 
-export function version(): string {
-  return ffi.weby_version();
+export { Wallet } from "./wallet.js";
+export { WebycashError } from "./error.js";
+export { resolveBackend, getBackend } from "./init.js";
+
+export type {
+  NetworkMode,
+  BackendType,
+  WalletOptions,
+  WalletStats,
+  ParsedWebcash,
+  VerifyResult,
+  RecoveryResult,
+  CheckResult,
+  WebycashErrorCode,
+} from "./types.js";
+
+export type { Backend, WalletHandle } from "./backend.js";
+
+// ── Standalone utilities ────────────────────────────────────────
+// These require a backend but don't need an open wallet.
+
+import { getBackend } from "./init.js";
+import type { BackendType, ParsedWebcash } from "./types.js";
+
+/** Get the library version string. */
+export async function version(backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).version();
 }
 
-export function amountParse(s: string): bigint {
-  const out = [BigInt(0)];
-  check(ffi.weby_amount_parse(s, out));
-  return out[0] as bigint;
+/** Parse an amount string to wats (integer). */
+export async function amountParse(s: string, backend?: BackendType): Promise<bigint> {
+  return (await getBackend(backend)).amountParse(s);
 }
 
-export function amountFormat(wats: bigint): string {
-  const out = [null];
-  check(ffi.weby_amount_format(wats, out));
-  return takeString(out[0]);
+/** Format wats as a decimal amount string. */
+export async function amountFormat(wats: bigint, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).amountFormat(wats);
 }
 
-export class Wallet {
-  private ptr: any;
+/** Derive a secret from master secret using HD wallet derivation. */
+export async function deriveSecret(masterSecretHex: string, chainCode: number, depth: number, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).deriveSecret(masterSecretHex, chainCode, depth);
+}
 
-  constructor(dbPath: string, seed?: Buffer) {
-    const out = [null];
-    if (seed) {
-      if (seed.length !== 32) throw new Error("seed must be 32 bytes");
-      check(ffi.weby_wallet_open_with_seed(dbPath, seed, seed.length, out));
-    } else {
-      check(ffi.weby_wallet_open(dbPath, out));
-    }
-    this.ptr = out[0];
-  }
+/** Generate a random 32-byte master secret as hex. */
+export async function generateMasterSecret(backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).generateMasterSecret();
+}
 
-  close(): void {
-    if (this.ptr) {
-      ffi.weby_wallet_free(this.ptr);
-      this.ptr = null;
-    }
-  }
+/** SHA-256 hash of a string, returned as hex. */
+export async function sha256Hex(data: string, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).sha256Hex(data);
+}
 
-  balance(): string {
-    const out = [null];
-    check(ffi.weby_wallet_balance(this.ptr, out));
-    return takeString(out[0]);
-  }
+/** Hash a secret string to its public webcash hash. */
+export async function secretToPublic(secret: string, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).secretToPublic(secret);
+}
 
-  insert(webcash: string): void {
-    check(ffi.weby_wallet_insert(this.ptr, webcash));
-  }
+/** Parse a webcash string into its components. */
+export async function parseWebcash(s: string, backend?: BackendType): Promise<ParsedWebcash> {
+  return (await getBackend(backend)).parseWebcash(s);
+}
 
-  pay(amount: string, memo = ""): string {
-    const out = [null];
-    check(ffi.weby_wallet_pay(this.ptr, amount, memo, out));
-    return takeString(out[0]);
-  }
+/** Format a webcash string from secret and amount in wats. */
+export async function formatWebcash(secret: string, amountWats: bigint, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).formatWebcash(secret, amountWats);
+}
 
-  check(): void {
-    check(ffi.weby_wallet_check(this.ptr));
-  }
-
-  merge(maxOutputs = 20): string {
-    const out = [null];
-    check(ffi.weby_wallet_merge(this.ptr, maxOutputs, out));
-    return takeString(out[0]);
-  }
-
-  recover(masterSecretHex: string, gapLimit = 20): string {
-    const out = [null];
-    check(ffi.weby_wallet_recover(this.ptr, masterSecretHex, gapLimit, out));
-    return takeString(out[0]);
-  }
-
-  stats(): string {
-    const out = [null];
-    check(ffi.weby_wallet_stats(this.ptr, out));
-    return takeString(out[0]);
-  }
-
-  exportSnapshot(): string {
-    const out = [null];
-    check(ffi.weby_wallet_export_snapshot(this.ptr, out));
-    return takeString(out[0]);
-  }
-
-  encryptSeed(password: string): void {
-    check(ffi.weby_wallet_encrypt_seed(this.ptr, password));
-  }
+/** Format a public webcash string from hash and amount in wats. */
+export async function formatPublicWebcash(hashHex: string, amountWats: bigint, backend?: BackendType): Promise<string> {
+  return (await getBackend(backend)).formatPublicWebcash(hashHex, amountWats);
 }

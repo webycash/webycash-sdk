@@ -1,6 +1,6 @@
 # Runnable SDK examples
 
-Each example opens a temp wallet, exercises **amount helpers**, **open / balance / stats**, optional **insert → check → pay → merge → recover** when `TEST_WEBCASH` is set, plus **export snapshot**, **encrypt seed**, and **error handling**.
+Each example opens a temp wallet, exercises **amount helpers**, **open / balance / stats**, optional **insert → check → pay → merge → recover → recover_from_wallet** when `TEST_WEBCASH` is set, plus **export/import snapshot**, **master secret**, **list webcash**, **encrypt seed**, **encrypt/decrypt with password**, and **error handling**.
 
 **Table of contents**
 

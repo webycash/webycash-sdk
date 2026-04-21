@@ -1,19 +1,32 @@
 {
   "name": "webycash-sdk",
-  "version": "0.2.14",
-  "description": "Webcash cross-platform SDK — Node.js/TypeScript bindings",
+  "version": "0.3.0",
+  "description": "Webcash SDK — Node.js, Browser, Deno, Bun (FFI + WASM)",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./wasm": {
+      "import": "./wasm/webycash_sdk_wasm.js",
+      "types": "./wasm/webycash_sdk_wasm.d.ts"
+    }
+  },
   "license": "MIT",
   "repository": "https://github.com/webycash/webycash-sdk",
-  "keywords": ["webcash", "wallet", "sdk", "payments"],
-  "files": ["dist", "*.so", "*.dylib", "*.dll"],
+  "keywords": ["webcash", "wallet", "sdk", "payments", "wasm", "cryptocurrency"],
+  "files": ["dist", "wasm", "*.so", "*.dylib", "*.dll"],
   "scripts": {
-    "build": "tsc",
-    "test": "node --test test/sdk.test.cjs",
+    "build:wasm": "../scripts/build-wasm.sh",
+    "build:ts": "tsc",
+    "build": "npm run build:ts",
+    "test": "node --test test/sdk.test.mjs",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {
+  "optionalDependencies": {
     "koffi": "^2.9.0"
   },
   "devDependencies": {

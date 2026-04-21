@@ -115,10 +115,31 @@ jobs:
             native/target/${{ matrix.target }}/release/*.a
             native/target/${{ matrix.target }}/release/*.lib
 
+  # ── Build WASM package ─────────────────────────────────────────
+  wasm:
+    name: WASM
+    needs: [webylib-on-crates-io]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build WASM
+        working-directory: wasm
+        run: wasm-pack build --target web --out-dir ../node/wasm --release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-pkg
+          path: node/wasm/
+
   # ── Binding smoke tests (offline FFI) ────────────────────────────
   test-bindings:
     name: Test bindings
-    needs: native
+    needs: [native, wasm]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -140,6 +161,10 @@ jobs:
           pip install -e "python[dev]"
           pytest python/tests/
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm-pkg
+          path: node/wasm
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -188,7 +213,7 @@ jobs:
   publish-npm:
     name: Publish npm
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [native, test-bindings]
+    needs: [native, wasm, test-bindings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -199,12 +224,13 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
-      - name: Copy native libs
+      - name: Copy native libs and WASM
         run: |
           cp artifacts/native-x86_64-unknown-linux-gnu/*.so node/ 2>/dev/null || true
           cp artifacts/native-aarch64-apple-darwin/*.dylib node/ 2>/dev/null || true
           cp artifacts/native-x86_64-apple-darwin/*.dylib node/ 2>/dev/null || true
           cp artifacts/native-x86_64-pc-windows-msvc/*.dll node/ 2>/dev/null || true
+          cp -r artifacts/wasm-pkg/* node/wasm/ 2>/dev/null || true
       - name: Publish
         working-directory: node
         run: |
@@ -343,6 +369,15 @@ jobs:
             tar czf "${STAGING}.tar.gz" "$STAGING"
             sha256sum "${STAGING}.tar.gz" > "${STAGING}.tar.gz.sha256"
           done
+          # WASM package
+          if [ -d "artifacts/wasm-pkg" ]; then
+            STAGING="webycash-sdk-${VERSION}-wasm32"
+            mkdir -p "$STAGING"
+            cp LICENSE README.md "$STAGING/"
+            cp artifacts/wasm-pkg/* "$STAGING/" 2>/dev/null || true
+            tar czf "${STAGING}.tar.gz" "$STAGING"
+            sha256sum "${STAGING}.tar.gz" > "${STAGING}.tar.gz.sha256"
+          fi
       - uses: softprops/action-gh-release@v2
         with:
           files: |

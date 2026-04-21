@@ -72,6 +72,24 @@ _lib.weby_wallet_export_snapshot.restype = ctypes.c_int32
 _lib.weby_wallet_encrypt_seed.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 _lib.weby_wallet_encrypt_seed.restype = ctypes.c_int32
 
+_lib.weby_wallet_import_snapshot.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+_lib.weby_wallet_import_snapshot.restype = ctypes.c_int32
+
+_lib.weby_wallet_list_webcash.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_char_p)]
+_lib.weby_wallet_list_webcash.restype = ctypes.c_int32
+
+_lib.weby_wallet_master_secret.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_char_p)]
+_lib.weby_wallet_master_secret.restype = ctypes.c_int32
+
+_lib.weby_wallet_encrypt_with_password.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p)]
+_lib.weby_wallet_encrypt_with_password.restype = ctypes.c_int32
+
+_lib.weby_wallet_decrypt_with_password.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+_lib.weby_wallet_decrypt_with_password.restype = ctypes.c_int32
+
+_lib.weby_wallet_recover_from_wallet.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.POINTER(ctypes.c_char_p)]
+_lib.weby_wallet_recover_from_wallet.restype = ctypes.c_int32
+
 _lib.weby_version.argtypes = []
 _lib.weby_version.restype = ctypes.c_char_p
 
@@ -199,3 +217,36 @@ class Wallet:
 
     def encrypt_seed(self, password: str):
         _check(_lib.weby_wallet_encrypt_seed(self._ptr, password.encode()))
+
+    def import_snapshot(self, json_str: str) -> None:
+        _check(_lib.weby_wallet_import_snapshot(self._ptr, json_str.encode()))
+
+    def list_webcash(self) -> str:
+        out = ctypes.c_char_p()
+        _check(_lib.weby_wallet_list_webcash(self._ptr, ctypes.byref(out)))
+        return _take_string(out)
+
+    @property
+    def master_secret(self) -> str:
+        out = ctypes.c_char_p()
+        _check(_lib.weby_wallet_master_secret(self._ptr, ctypes.byref(out)))
+        return _take_string(out)
+
+    def encrypt_with_password(self, password: str) -> str:
+        out = ctypes.c_char_p()
+        _check(_lib.weby_wallet_encrypt_with_password(
+            self._ptr, password.encode(), ctypes.byref(out)
+        ))
+        return _take_string(out)
+
+    def decrypt_with_password(self, encrypted_json: str, password: str) -> None:
+        _check(_lib.weby_wallet_decrypt_with_password(
+            self._ptr, encrypted_json.encode(), password.encode()
+        ))
+
+    def recover_from_wallet(self, gap_limit: int = 20) -> str:
+        out = ctypes.c_char_p()
+        _check(_lib.weby_wallet_recover_from_wallet(
+            self._ptr, gap_limit, ctypes.byref(out)
+        ))
+        return _take_string(out)
