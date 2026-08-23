@@ -21,3 +21,8 @@ bin/
 obj/
 .swiftpm/
 swift/.build/
+
+# Secrets — never commit dotenv files (referee/keyserver/frontend env)
+.env
+.env.*
+!.env.example
